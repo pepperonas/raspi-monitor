@@ -17,7 +17,7 @@ module.exports = {
         DB_USER: 'raspi_monitor',
         DB_PASSWORD: 'monitoring_secure_pass_2024',
         DB_NAME: 'raspi_monitor',
-        METRICS_INTERVAL: 30000,
+        METRICS_INTERVAL: 5000,
         CLEANUP_INTERVAL: 86400000,
         DATA_RETENTION_DAYS: 30,
         ALERT_CPU_THRESHOLD: 80,
@@ -42,7 +42,7 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 4999,
         LOG_LEVEL: 'warn',
-        METRICS_INTERVAL: 30000,
+        METRICS_INTERVAL: 5000,
       },
       
       // Restart configuration

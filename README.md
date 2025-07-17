@@ -26,7 +26,7 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 ### Dashboard
 - Übersichtliche Anzeige aller Systemmetriken
 - Farbcodierte Warnstufen (grün/gelb/rot)
-- Live-Updates alle 5 Sekunden
+- Live-Updates alle 5 Sekunden (Performance-Daten werden alle 5 Sekunden aktualisiert)
 
 ### Charts
 - Interaktive Diagramme mit Chart.js
