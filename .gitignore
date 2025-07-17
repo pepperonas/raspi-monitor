@@ -121,7 +121,7 @@ dist
 .pnp.*
 
 # React build output
-build/
+# build/  # Commented out to include build folder in git
 dist/
 
 # PM2 files
