@@ -5,8 +5,9 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 ## 🎨 Mockups
 
 <div align="center">
-  <img src="raspi-mockup-1.png" alt="Raspberry Pi Monitor Dashboard" width="45%" />
-  <img src="raspi-mockup-2.png" alt="Raspberry Pi Monitor Charts" width="45%" />
+  <img src="raspi-mockup-1.png" alt="Raspberry Pi Monitor Dashboard" width="80%" />
+  <br><br>
+  <img src="raspi-mockup-2.png" alt="Raspberry Pi Monitor Charts" width="80%" />
 </div>
 
 ## ✨ Features
