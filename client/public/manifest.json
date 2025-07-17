@@ -1,0 +1,24 @@
+{
+  "name": "Raspberry Pi System Monitor",
+  "short_name": "Raspi Monitor",
+  "description": "Echtzeit System-Monitoring und Analytics",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a1b21",
+  "theme_color": "#2c2e3b",
+  "icons": [
+    {
+      "src": "/client/public/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/client/public/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

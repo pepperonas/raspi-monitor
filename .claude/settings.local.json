@@ -28,7 +28,11 @@
       "Bash(npm cache clean:*)",
       "Bash(npm start)",
       "Bash(kill:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(vcgencmd measure_temp:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
