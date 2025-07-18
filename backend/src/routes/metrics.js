@@ -167,42 +167,36 @@ router.get('/summary', async (req, res) => {
     const { hours = 24 } = req.query;
     const hoursBack = parseInt(hours);
     
-    const summaryQueries = [
-      // CPU Summary
-      `SELECT 
-        'cpu' as type,
-        AVG(cpu_usage_percent) as avg_value,
-        MAX(cpu_usage_percent) as max_value,
-        MIN(cpu_usage_percent) as min_value,
-        AVG(cpu_temp_celsius) as avg_temp
-      FROM cpu_metrics 
-      WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)`,
-      
-      // Memory Summary
-      `SELECT 
-        'memory' as type,
-        AVG(usage_percent) as avg_value,
-        MAX(usage_percent) as max_value,
-        MIN(usage_percent) as min_value,
-        AVG(used_bytes) as avg_used_bytes
-      FROM memory_metrics 
-      WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)`,
-      
-      // Disk Summary
-      `SELECT 
-        'disk' as type,
-        AVG(usage_percent) as avg_value,
-        MAX(usage_percent) as max_value,
-        MIN(usage_percent) as min_value,
-        filesystem
-      FROM disk_metrics 
-      WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)
-      GROUP BY filesystem`
-    ];
+    // Simplified queries for testing
+    const cpuQuery = `SELECT 
+      AVG(cpu_usage_percent) as avg_value,
+      MAX(cpu_usage_percent) as max_value,
+      MIN(cpu_usage_percent) as min_value,
+      AVG(cpu_temp_celsius) as avg_temp,
+      MAX(cpu_temp_celsius) as max_temp
+    FROM cpu_metrics 
+    WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)`;
     
-    const [cpuSummary] = await executeQuery(summaryQueries[0], [hoursBack]);
-    const [memorySummary] = await executeQuery(summaryQueries[1], [hoursBack]);
-    const diskSummary = await executeQuery(summaryQueries[2], [hoursBack]);
+    const memoryQuery = `SELECT 
+      AVG(usage_percent) as avg_value,
+      MAX(usage_percent) as max_value,
+      MIN(usage_percent) as min_value,
+      AVG(used_bytes) as avg_used_bytes
+    FROM memory_metrics 
+    WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)`;
+    
+    const diskQuery = `SELECT 
+      AVG(usage_percent) as avg_value,
+      MAX(usage_percent) as max_value,
+      MIN(usage_percent) as min_value,
+      filesystem
+    FROM disk_metrics 
+    WHERE timestamp >= DATE_SUB(NOW(), INTERVAL ? HOUR)
+    GROUP BY filesystem`;
+    
+    const cpuSummary = await executeQuery(cpuQuery, [hoursBack]);
+    const memorySummary = await executeQuery(memoryQuery, [hoursBack]);
+    const diskSummary = await executeQuery(diskQuery, [hoursBack]);
     
     res.json({
       period_hours: hoursBack,

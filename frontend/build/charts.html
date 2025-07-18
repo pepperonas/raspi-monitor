@@ -1107,16 +1107,34 @@
             }
             
             updateSummary(data) {
-                if (data.cpu) {
-                    document.getElementById('avg-cpu').textContent = `${data.cpu.avg_value?.toFixed(1)}%`;
-                    document.getElementById('max-cpu').textContent = `${data.cpu.max_value?.toFixed(1)}%`;
-                    document.getElementById('avg-temp').textContent = `${data.cpu.avg_temp?.toFixed(1)}°C`;
-                    document.getElementById('max-temp').textContent = `${data.cpu.max_temp?.toFixed(1)}°C`;
+                console.log('updateSummary called with data:', data);
+                
+                if (data && data.cpu) {
+                    const avgCpu = data.cpu.avg_value;
+                    const maxCpu = data.cpu.max_value;
+                    const avgTemp = data.cpu.avg_temp;
+                    const maxTemp = data.cpu.max_temp;
+                    
+                    console.log('CPU values:', { avgCpu, maxCpu, avgTemp, maxTemp });
+                    
+                    document.getElementById('avg-cpu').textContent = avgCpu ? `${parseFloat(avgCpu).toFixed(1)}%` : '--';
+                    document.getElementById('max-cpu').textContent = maxCpu ? `${parseFloat(maxCpu).toFixed(1)}%` : '--';
+                    document.getElementById('avg-temp').textContent = avgTemp ? `${parseFloat(avgTemp).toFixed(1)}°C` : '--';
+                    document.getElementById('max-temp').textContent = maxTemp ? `${parseFloat(maxTemp).toFixed(1)}°C` : '--';
+                } else {
+                    console.log('No CPU data found');
                 }
                 
-                if (data.memory) {
-                    document.getElementById('avg-memory').textContent = `${data.memory.avg_value?.toFixed(1)}%`;
-                    document.getElementById('max-memory').textContent = `${data.memory.max_value?.toFixed(1)}%`;
+                if (data && data.memory) {
+                    const avgMemory = data.memory.avg_value;
+                    const maxMemory = data.memory.max_value;
+                    
+                    console.log('Memory values:', { avgMemory, maxMemory });
+                    
+                    document.getElementById('avg-memory').textContent = avgMemory ? `${parseFloat(avgMemory).toFixed(1)}%` : '--';
+                    document.getElementById('max-memory').textContent = maxMemory ? `${parseFloat(maxMemory).toFixed(1)}%` : '--';
+                } else {
+                    console.log('No memory data found');
                 }
             }
             
