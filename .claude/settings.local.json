@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./setup.sh:*)",
+      "Bash(sudo systemctl:*)",
+      "Bash(sudo mysql:*)",
+      "Bash(npm install:*)",
+      "Bash(ls:*)",
+      "Bash(npm ci:*)",
+      "Bash(npm config:*)",
+      "Bash(pm2 status:*)",
+      "Bash(rm:*)",
+      "Bash(pm2 start:*)",
+      "Bash(pm2 logs:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(mysql:*)",
+      "Bash(pm2 stop:*)",
+      "Bash(pm2 delete:*)",
+      "Bash(curl:*)",
+      "Bash(npm run build:*)",
+      "Bash(./node_modules/.bin/react-scripts:*)",
+      "Bash(find:*)",
+      "Bash(pm2:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm run:*)",
+      "Bash(sudo:*)",
+      "Bash(npx create-react-app:*)",
+      "Bash(npm cache clean:*)",
+      "Bash(npm start)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(vcgencmd measure_temp:*)",
+      "Bash(git push:*)",
+      "Bash(node:*)",
+      "Bash(journalctl:*)"
+    ],
+    "deny": []
+  }
+}
