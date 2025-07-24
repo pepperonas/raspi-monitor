@@ -250,7 +250,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             {gpu.fan_status?.description || 'Unknown'}
           </MetricValue>
           <MetricSubtext>
-            Level: {gpu.fan_status?.level !== null ? gpu.fan_status.level : '--'} • 
+            Level: {(gpu.fan_status && gpu.fan_status.level !== null) ? gpu.fan_status.level : '--'} • 
             Status: {gpu.fan_status?.status || 'unknown'}
           </MetricSubtext>
         </MetricCard>
