@@ -13,7 +13,13 @@ const SidebarContainer = styled.nav`
   transition: width 0.3s ease;
   z-index: 1000;
   overflow: hidden;
-  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
+  
+  @media (max-width: 768px) {
+    transform: ${props => props.isOpen ? 'translateX(0)' : 'translateX(-100%)'};
+    width: 280px;
+    transition: transform 0.3s ease;
+  }
 `;
 
 const SidebarHeader = styled.div`
@@ -27,13 +33,9 @@ const SidebarHeader = styled.div`
 const Logo = styled.div`
   width: 32px;
   height: 32px;
-  background: ${props => props.theme.colors.primary};
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: bold;
   font-size: 1.2rem;
 `;
 
@@ -65,7 +67,7 @@ const NavigationLink = styled(Link)`
   text-decoration: none;
   transition: all 0.3s ease;
   border-right: 3px solid ${props => props.active ? props.theme.colors.primary : 'transparent'};
-  background: ${props => props.active ? `${props.theme.colors.primary}10` : 'transparent'};
+  background: ${props => props.active ? `${props.theme.colors.primary}20` : 'transparent'};
   
   &:hover {
     color: ${props => props.theme.colors.primary};
@@ -95,6 +97,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
   const navigationItems = [
     { path: '/dashboard', icon: '📊', text: 'Dashboard' },
     { path: '/metrics', icon: '📈', text: 'Metrics' },
+    { path: '/charts', icon: '📋', text: 'Charts' },
     { path: '/alerts', icon: '🚨', text: 'Alerts' },
     { path: '/system', icon: '⚙️', text: 'System' },
     { path: '/settings', icon: '🔧', text: 'Settings' }
@@ -103,7 +106,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
   return (
     <SidebarContainer isOpen={isOpen}>
       <SidebarHeader>
-        <Logo>🥧</Logo>
+        <Logo>🔥</Logo>
         <SidebarTitle isOpen={isOpen}>Pi Monitor</SidebarTitle>
       </SidebarHeader>
       

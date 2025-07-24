@@ -18,7 +18,7 @@ const WebSocketService = require('./services/WebSocketService');
 
 const app = express();
 const server = http.createServer(app);
-const PORT = process.env.PORT || 4999;
+const PORT = process.env.PORT || 5004;
 
 // Logging Setup
 const logger = winston.createLogger({
@@ -57,7 +57,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "http://192.168.2.130:4999", "http://localhost:4999", "ws://192.168.2.130:4999", "ws://localhost:4999"],
+      connectSrc: ["'self'", "http://192.168.2.132:4999", "http://localhost:4999", "ws://192.168.2.132:4999", "ws://localhost:4999", "ws:", "wss:"],
       upgradeInsecureRequests: null
     }
   },
@@ -125,7 +125,11 @@ app.use((error, req, res, next) => {
 });
 
 // WebSocket Setup
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ 
+  server,
+  perMessageDeflate: false,
+  clientTracking: true
+});
 const wsService = new WebSocketService(wss, logger);
 
 // Services
@@ -224,7 +228,7 @@ server.listen(PORT, '0.0.0.0', () => {
   logger.info(`🚀 Raspberry Pi Monitor Server running on port ${PORT}`);
   logger.info(`📊 WebSocket Server running on port ${PORT}`);
   logger.info(`🌐 Dashboard: http://localhost:${PORT}`);
-  logger.info(`🌐 Remote: http://192.168.2.130:${PORT}`);
+  logger.info(`🌐 Remote: http://192.168.2.132:${PORT}`);
   logger.info(`🔧 API: http://localhost:${PORT}/api`);
   
   initializeServices();

@@ -9,7 +9,7 @@ const HeaderContainer = styled.header`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 `;
 
 const LeftSection = styled.div`
@@ -23,7 +23,7 @@ const MenuButton = styled.button`
   border: none;
   cursor: pointer;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 0.5rem;
   color: ${props => props.theme.colors.text};
   font-size: 1.2rem;
   
@@ -57,7 +57,7 @@ const StatusDot = styled.div`
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: ${props => props.connected ? '#4caf50' : '#ff6b6b'};
+  background-color: ${props => props.connected ? '#9cb68f' : '#e16162'};
   animation: ${props => props.connected ? 'pulse 2s infinite' : 'none'};
 
   @keyframes pulse {
@@ -72,7 +72,7 @@ const ThemeToggle = styled.button`
   border: none;
   cursor: pointer;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 0.5rem;
   color: ${props => props.theme.colors.text};
   font-size: 1.2rem;
   
@@ -82,7 +82,7 @@ const ThemeToggle = styled.button`
 `;
 
 const AlertsCount = styled.div`
-  background: ${props => props.count > 0 ? '#ff6b6b' : 'transparent'};
+  background: ${props => props.count > 0 ? '#e16162' : 'transparent'};
   color: white;
   border-radius: 12px;
   padding: 4px 8px;

@@ -296,12 +296,14 @@ class MetricsCollector extends EventEmitter {
       // For Raspberry Pi, we'll try to get GPU temperature from vcgencmd
       const gpuTemp = await this.getGPUTemperature();
       const gpuMemory = await this.getGPUMemory();
+      const fanStatus = await this.getFanStatus();
       
       return {
         gpu_temp_celsius: gpuTemp,
         gpu_memory_used_bytes: gpuMemory.used,
         gpu_memory_total_bytes: gpuMemory.total,
-        gpu_usage_percent: null // Not easily available on Pi
+        gpu_usage_percent: null, // Not easily available on Pi
+        fan_status: fanStatus
       };
     } catch (error) {
       this.logger.error('Error collecting GPU metrics:', error);
@@ -339,6 +341,40 @@ class MetricsCollector extends EventEmitter {
       };
     } catch (error) {
       return { total: null, used: null };
+    }
+  }
+
+  async getFanStatus() {
+    try {
+      const fs = require('fs').promises;
+      
+      // Read fan status from thermal cooling device
+      const fanStateRaw = await fs.readFile('/sys/class/thermal/cooling_device0/cur_state', 'utf8');
+      const fanState = parseInt(fanStateRaw.trim());
+      
+      return {
+        level: fanState,
+        status: fanState === 0 ? 'off' : 'on',
+        description: this.getFanDescription(fanState)
+      };
+    } catch (error) {
+      this.logger.warn('Could not read fan status:', error.message);
+      return {
+        level: null,
+        status: 'unknown',
+        description: 'Fan status unavailable'
+      };
+    }
+  }
+
+  getFanDescription(level) {
+    switch (level) {
+      case 0: return 'Fan Off';
+      case 1: return 'Fan Low';
+      case 2: return 'Fan Medium';
+      case 3: return 'Fan High';
+      case 4: return 'Fan Max';
+      default: return `Fan Level ${level}`;
     }
   }
 

@@ -100,11 +100,14 @@ const getMetricsInRange = async (table, startTime, endTime, limit = 1000) => {
   try {
     const query = `
       SELECT * FROM ${table} 
-      WHERE timestamp BETWEEN ? AND ? 
+      WHERE timestamp >= ? AND timestamp <= ?
       ORDER BY timestamp DESC 
       LIMIT ?
     `;
-    return await executeQuery(query, [startTime, endTime, limit]);
+    console.log(`SQL Query: ${query} with params:`, [startTime, endTime, limit]);
+    const result = await executeQuery(query, [startTime, endTime, limit]);
+    console.log(`Query result for ${table}: ${result.length} rows, first timestamp:`, result[0]?.timestamp);
+    return result;
   } catch (error) {
     console.error(`Error fetching range from ${table}:`, error.message);
     throw error;

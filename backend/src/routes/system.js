@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const { exec } = require('child_process');
+const fs = require('fs').promises;
 const { 
   getLatestMetrics, 
   executeQuery 
@@ -228,5 +230,118 @@ function formatUptime(seconds) {
   
   return formatted.trim();
 }
+
+// POST /api/system/led-control - Control Raspberry Pi LEDs
+router.post('/led-control', async (req, res) => {
+  try {
+    const { led, action, permanent } = req.body;
+    
+    if (!led || !action) {
+      return res.status(400).json({ error: 'led and action are required' });
+    }
+    
+    if (!['ACT', 'PWR'].includes(led)) {
+      return res.status(400).json({ error: 'led must be ACT or PWR' });
+    }
+    
+    if (!['on', 'off'].includes(action)) {
+      return res.status(400).json({ error: 'action must be on or off' });
+    }
+    
+    const brightness = action === 'on' ? '1' : '0';
+    const ledPath = `/sys/class/leds/${led}/brightness`;
+    
+    if (permanent) {
+      // Permanent mode: modify config.txt
+      const configPath = '/boot/firmware/config.txt';
+      
+      try {
+        let configContent = await fs.readFile(configPath, 'utf8');
+        
+        // LED configuration lines
+        const actTriggerLine = 'dtparam=act_led_trigger=none';
+        const actActiveLowLine = 'dtparam=act_led_activelow=off';
+        const pwrTriggerLine = 'dtparam=pwr_led_trigger=none';
+        const pwrActiveLowLine = 'dtparam=pwr_led_activelow=off';
+        
+        if (action === 'off') {
+          // Add or uncomment the lines to disable LEDs
+          if (led === 'ACT') {
+            if (!configContent.includes(actTriggerLine)) {
+              configContent += `\n# LEDs ausschalten Pi 5\n${actTriggerLine}\n${actActiveLowLine}\n`;
+            } else {
+              configContent = configContent.replace(`# ${actTriggerLine}`, actTriggerLine);
+              configContent = configContent.replace(`# ${actActiveLowLine}`, actActiveLowLine);
+            }
+          } else if (led === 'PWR') {
+            if (!configContent.includes(pwrTriggerLine)) {
+              configContent += `\n${pwrTriggerLine}\n${pwrActiveLowLine}\n`;
+            } else {
+              configContent = configContent.replace(`# ${pwrTriggerLine}`, pwrTriggerLine);
+              configContent = configContent.replace(`# ${pwrActiveLowLine}`, pwrActiveLowLine);
+            }
+          }
+        } else {
+          // Comment out the lines to enable LEDs
+          if (led === 'ACT') {
+            configContent = configContent.replace(actTriggerLine, `# ${actTriggerLine}`);
+            configContent = configContent.replace(actActiveLowLine, `# ${actActiveLowLine}`);
+          } else if (led === 'PWR') {
+            configContent = configContent.replace(pwrTriggerLine, `# ${pwrTriggerLine}`);
+            configContent = configContent.replace(pwrActiveLowLine, `# ${pwrActiveLowLine}`);
+          }
+        }
+        
+        await fs.writeFile(configPath, configContent);
+        
+        // Also apply temporary change
+        await new Promise((resolve, reject) => {
+          exec(`echo ${brightness} | sudo tee ${ledPath}`, (error, stdout, stderr) => {
+            if (error) {
+              console.error('Temporary LED control error:', error);
+            }
+            resolve();
+          });
+        });
+        
+        res.json({ 
+          success: true, 
+          message: `${led} LED ${action} (permanent - requires reboot)`,
+          permanent: true
+        });
+        
+      } catch (configError) {
+        console.error('Config file error:', configError);
+        // Fallback to temporary control
+        exec(`echo ${brightness} | sudo tee ${ledPath}`, (error, stdout, stderr) => {
+          if (error) {
+            return res.status(500).json({ error: error.message });
+          }
+          res.json({ 
+            success: true, 
+            message: `${led} LED ${action} (temporary only - config error)`,
+            permanent: false
+          });
+        });
+      }
+    } else {
+      // Temporary mode: direct brightness control
+      exec(`echo ${brightness} | sudo tee ${ledPath}`, (error, stdout, stderr) => {
+        if (error) {
+          return res.status(500).json({ error: error.message });
+        }
+        
+        res.json({ 
+          success: true, 
+          message: `${led} LED ${action} (temporary)`,
+          permanent: false
+        });
+      });
+    }
+    
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 module.exports = router;

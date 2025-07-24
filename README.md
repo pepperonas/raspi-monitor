@@ -5,33 +5,45 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 ## 🎨 Mockups
 
 <div align="center">
-  <img src="raspi-mockup-1.png" alt="Raspberry Pi Monitor Dashboard" width="80%" />
+  <img src="mockup-Raspi-Monitor-1.png" alt="Raspberry Pi Monitor Dashboard" width="80%" />
   <br><br>
-  <img src="raspi-mockup-2.png" alt="Raspberry Pi Monitor Charts" width="80%" />
+  <img src="mockup-Raspi-Monitor-2.png" alt="Raspberry Pi Monitor Metrics" width="80%" />
+  <br><br>
+  <img src="mockup-Raspi-Monitor-3.png" alt="Raspberry Pi Monitor Charts" width="80%" />
 </div>
 
 ## ✨ Features
 
-- **📈 Echtzeit-Monitoring**: Live-Überwachung von CPU, Speicher, Festplatte und Netzwerk
-- **📊 Historische Charts**: Datenvisualisierung mit verschiedenen Zeiträumen (1h, 6h, 24h, 7d, 30d)
-- **⚡ Stromverbrauch**: Automatische Berechnung und Kostenanalyse des Energieverbrauchs
-- **🌙 Dark Theme**: Moderne Benutzeroberfläche im fog-controller Design
+- **📈 Echtzeit-Monitoring**: Live-Überwachung von CPU, Speicher, Festplatte und Netzwerk (1-Sekunden-Updates)
+- **📊 Historische Charts**: Interaktive Datenvisualisierung mit Recharts (1h, 6h, 24h, 7d)
+- **🌀 Lüfter-Status**: Raspberry Pi 5 Lüfterüberwachung (Level 0-4)
+- **🔥 Modern Dark Theme**: Elegante Benutzeroberfläche mit Material Design
 - **📱 Responsive**: Optimiert für Desktop und mobile Geräte
-- **🚀 WebSocket**: Echtzeitübertragung der Systemdaten
+- **🚀 WebSocket**: Echtzeitübertragung der Systemdaten mit automatischer Wiederverbindung
 - **🔧 REST API**: Vollständige API für Datenabfragen
 - **📋 Alerts**: Intelligente Benachrichtigungen bei kritischen Systemzuständen
+- **🌐 Network I/O**: Echtzeit-Netzwerktraffic in KB/s
+- **🕐 Deutsche Zeitzone**: Korrekte Zeitanzeige (Europe/Berlin)
 
 ## 🖥️ Screenshots
 
 ### Dashboard
 - Übersichtliche Anzeige aller Systemmetriken
 - Farbcodierte Warnstufen (grün/gelb/rot)
-- Live-Updates alle 5 Sekunden (Performance-Daten werden alle 5 Sekunden aktualisiert)
+- Live-Updates jede Sekunde
+- Lüfter-Status und Temperaturüberwachung
+- Echtzeit-Netzwerktraffic
+
+### Metrics
+- Detaillierte Systemstatistiken
+- CPU, Memory, Disk und Network Metriken
+- Prozess-Information und GPU-Status
 
 ### Charts
-- Interaktive Diagramme mit Chart.js
-- Zeitbereich-Selektor für flexible Datenansicht
-- Stromverbrauchsanalyse mit Kostenschätzung
+- Interaktive Diagramme mit Recharts
+- Zeitbereich-Selektor (1h, 6h, 24h, 7d)
+- Deutsche Zeitzone (Europe/Berlin)
+- Responsive Design für alle Geräte
 
 ## 🛠️ Installation
 
@@ -170,30 +182,37 @@ Die Monitor-App ist über zwei URLs erreichbar:
 Das System sammelt folgende Metriken:
 
 ### CPU
-- Auslastung pro Kern
-- Temperatur
-- Frequenz
-- Anzahl Prozesse
+- Auslastung pro Kern und gesamt
+- Temperatur (vcgencmd)
+- Frequenz (Min/Max/Current)
+- Load Average (1min, 5min, 15min)
 
-### Speicher
-- RAM-Nutzung
+### Memory
+- RAM-Nutzung (total/used/available/free)
 - Swap-Nutzung
-- Verfügbarer Speicher
+- Prozentuale Auslastung
 
-### Festplatte
-- Speicherplatz-Nutzung
-- I/O-Statistiken
-- Mount-Points
+### Disk
+- Speicherplatz-Nutzung pro Filesystem
+- Mount-Points und Inodes
+- Verfügbarer Speicherplatz
 
-### Netzwerk
-- Übertragungsraten
-- Bytes gesendet/empfangen
-- Netzwerk-Interfaces
+### Network
+- Bytes gesendet/empfangen pro Interface
+- Echtzeit-Traffic-Rate (KB/s)
+- Pakete, Fehler und Drops
+- Interface-Geschwindigkeit und MTU
 
-### Stromverbrauch
-- Geschätzte Leistungsaufnahme
-- Tägliche/monatliche Kosten
-- Energieeffizienz-Trends
+### GPU & System
+- GPU-Temperatur (vcgencmd)
+- GPU-Memory (falls verfügbar)
+- **Lüfter-Status (Raspberry Pi 5)**:
+  - Level 0-4 (Off/Low/Medium/High/Max)
+  - Status (on/off/unknown)
+
+### Processes
+- Anzahl laufende/schlafende/zombie Prozesse
+- CPU/Memory-Nutzung der Top-Prozesse
 
 ## 🔧 Development
 

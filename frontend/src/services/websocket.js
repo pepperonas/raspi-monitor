@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import { WS_BASE_URL } from '../config/api';
 
 export class WebSocketService extends EventEmitter {
   constructor() {
@@ -13,8 +14,7 @@ export class WebSocketService extends EventEmitter {
   }
 
   connect() {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}`;
+    const wsUrl = WS_BASE_URL;
     
     console.log(`🔗 Connecting to WebSocket: ${wsUrl}`);
     
@@ -50,6 +50,13 @@ export class WebSocketService extends EventEmitter {
       }
     };
 
+    // Handle WebSocket ping frames (binary data)
+    this.ws.addEventListener('ping', () => {
+      if (this.ws.readyState === WebSocket.OPEN) {
+        this.ws.pong();
+      }
+    });
+
     this.ws.onclose = (event) => {
       console.log(`🔗 WebSocket disconnected: ${event.code} - ${event.reason}`);
       this.isConnected = false;
@@ -63,7 +70,9 @@ export class WebSocketService extends EventEmitter {
 
     this.ws.onerror = (error) => {
       console.error('WebSocket error:', error);
-      this.emit('error', error);
+      this.isConnected = false;
+      // Don't emit error to prevent uncaught error
+      // this.emit('error', error);
     };
   }
 
@@ -152,8 +161,10 @@ export class WebSocketService extends EventEmitter {
 
   startHeartbeat() {
     this.heartbeatTimer = setInterval(() => {
-      this.ping();
-    }, 30000); // 30 seconds
+      if (this.isConnected) {
+        this.ping();
+      }
+    }, 25000); // 25 seconds - less than backend's 30s timeout
   }
 
   stopHeartbeat() {
@@ -171,12 +182,14 @@ export class WebSocketService extends EventEmitter {
     }
 
     this.reconnectAttempts++;
-    const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
+    const delay = Math.min(this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1), 30000);
     
     console.log(`🔄 Reconnecting in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
     
     setTimeout(() => {
-      this.connect();
+      if (!this.isConnected) {
+        this.connect();
+      }
     }, delay);
   }
 

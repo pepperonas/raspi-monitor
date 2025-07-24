@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { apiRequest } from '../config/api';
 
 const MetricsContainer = styled.div`
   padding: 20px;
@@ -17,10 +18,10 @@ const PageTitle = styled.h1`
 const ChartContainer = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 12px;
+  border-radius: 1rem;
   padding: 24px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
 `;
 
 const ChartTitle = styled.h3`
@@ -35,16 +36,16 @@ const TemperatureChart = styled.div`
   align-items: center;
   gap: 20px;
   padding: 20px;
-  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
-  border-radius: 8px;
+  background: linear-gradient(135deg, #9cb68f 0%, #84a373 100%);
+  border-radius: 0.5rem;
   color: white;
   
   ${props => {
     const temp = props.temperature;
-    if (temp > 70) return 'background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);';
-    if (temp > 60) return 'background: linear-gradient(135deg, #ffa726 0%, #fb8c00 100%);';
-    if (temp > 50) return 'background: linear-gradient(135deg, #ffeb3b 0%, #ffc107 100%);';
-    return 'background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);';
+    if (temp > 70) return 'background: linear-gradient(135deg, #e16162 0%, #dc2626 100%);';
+    if (temp > 60) return 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);';
+    if (temp > 50) return 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);';
+    return 'background: linear-gradient(135deg, #9cb68f 0%, #84a373 100%);';
   }}
 `;
 
@@ -77,7 +78,7 @@ const MetricsList = styled.div`
 const MetricItem = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 8px;
+  border-radius: 0.5rem;
   padding: 16px;
   
   h4 {
@@ -100,6 +101,8 @@ const MetricItem = styled.div`
 
 const Metrics = ({ metrics = {}, isConnected = false }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [metricsData, setMetricsData] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -109,6 +112,26 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
     return () => clearInterval(timer);
   }, []);
 
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        setLoading(true);
+        const data = await apiRequest('/api/metrics');
+        setMetricsData(data);
+      } catch (error) {
+        console.error('Failed to fetch metrics:', error);
+        setMetricsData(metrics);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMetrics();
+    const interval = setInterval(fetchMetrics, 1000); // Update every 1 second
+
+    return () => clearInterval(interval);
+  }, [metrics]);
+
   const formatBytes = (bytes) => {
     if (!bytes) return '0 B';
     const sizes = ['B', 'KB', 'MB', 'GB'];
@@ -116,12 +139,25 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
   };
 
-  const cpu = metrics.cpu?.[0] || {};
-  const memory = metrics.memory?.[0] || {};
-  const disk = metrics.disk?.[0] || {};
-  const gpu = metrics.gpu?.[0] || {};
-  const processes = metrics.processes?.[0] || {};
-  const network = metrics.network?.[0] || {};
+  const currentMetrics = Object.keys(metricsData).length > 0 ? metricsData : metrics;
+  
+  const cpu = currentMetrics.cpu?.[0] || {};
+  const memory = currentMetrics.memory?.[0] || {};
+  const disk = currentMetrics.disk?.[0] || {};
+  const gpu = currentMetrics.gpu?.[0] || {};
+  const processes = currentMetrics.processes?.[0] || {};
+  const network = currentMetrics.network?.[0] || {};
+  
+  if (loading && Object.keys(currentMetrics).length === 0) {
+    return (
+      <MetricsContainer>
+        <PageTitle>Metrics</PageTitle>
+        <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+          Loading metrics...
+        </div>
+      </MetricsContainer>
+    );
+  }
 
   return (
     <MetricsContainer>

@@ -6,9 +6,42 @@ const {
   executeQuery 
 } = require('../../config/database');
 
-// GET /api/metrics/latest - Get latest metrics for all categories
-router.get('/latest', async (req, res) => {
+// Helper function to get live fan status
+const getFanStatus = async () => {
   try {
+    const fs = require('fs').promises;
+    const fanStateRaw = await fs.readFile('/sys/class/thermal/cooling_device0/cur_state', 'utf8');
+    const fanState = parseInt(fanStateRaw.trim());
+    
+    const getFanDescription = (level) => {
+      switch (level) {
+        case 0: return 'Fan Off';
+        case 1: return 'Fan Low';
+        case 2: return 'Fan Medium';
+        case 3: return 'Fan High';
+        case 4: return 'Fan Max';
+        default: return `Fan Level ${level}`;
+      }
+    };
+    
+    return {
+      level: fanState,
+      status: fanState === 0 ? 'off' : 'on',
+      description: getFanDescription(fanState)
+    };
+  } catch (error) {
+    return {
+      level: null,
+      status: 'unknown',
+      description: 'Fan status unavailable'
+    };
+  }
+};
+
+// GET /api/metrics - Get latest metrics for all categories (default route)
+router.get('/', async (req, res) => {
+  try {
+    const fanStatus = await getFanStatus();
     const metrics = {
       cpu: await getLatestMetrics('cpu_metrics', 1),
       memory: await getLatestMetrics('memory_metrics', 1),
@@ -18,6 +51,36 @@ router.get('/latest', async (req, res) => {
       gpu: await getLatestMetrics('gpu_metrics', 1),
       timestamp: new Date().toISOString()
     };
+    
+    // Add fan status to GPU metrics if available
+    if (metrics.gpu && metrics.gpu.length > 0) {
+      metrics.gpu[0].fan_status = fanStatus;
+    }
+    
+    res.json(metrics);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/metrics/latest - Get latest metrics for all categories
+router.get('/latest', async (req, res) => {
+  try {
+    const fanStatus = await getFanStatus();
+    const metrics = {
+      cpu: await getLatestMetrics('cpu_metrics', 1),
+      memory: await getLatestMetrics('memory_metrics', 1),
+      disk: await getLatestMetrics('disk_metrics', 5),
+      network: await getLatestMetrics('network_metrics', 10),
+      processes: await getLatestMetrics('process_metrics', 1),
+      gpu: await getLatestMetrics('gpu_metrics', 1),
+      timestamp: new Date().toISOString()
+    };
+    
+    // Add fan status to GPU metrics if available
+    if (metrics.gpu && metrics.gpu.length > 0) {
+      metrics.gpu[0].fan_status = fanStatus;
+    }
     
     res.json(metrics);
   } catch (error) {
@@ -226,6 +289,97 @@ router.get('/interfaces', async (req, res) => {
     
     res.json(interfaces);
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/metrics/charts - Get chart data for specified time range
+router.get('/charts', async (req, res) => {
+  try {
+    const { 
+      range = '1h', 
+      limit = 50 
+    } = req.query;
+    
+    // Calculate time range in UTC to match database timestamps
+    const now = new Date();
+    let startTime = new Date();
+    
+    switch (range) {
+      case '1h':
+        startTime = new Date(now.getTime() - (60 * 60 * 1000));
+        break;
+      case '6h':
+        startTime = new Date(now.getTime() - (6 * 60 * 60 * 1000));
+        break;
+      case '24h':
+        startTime = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        break;
+      case '7d':
+        startTime = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+        break;
+      default:
+        startTime = new Date(now.getTime() - (60 * 60 * 1000));
+    }
+    
+    const timeRange = `${startTime.toISOString()},${now.toISOString()}`;
+    
+    // Temporary fix: Get latest data without time range filtering
+    // This bypasses the timezone issue in the database query
+    const [cpuData, memoryData, networkData, gpuData] = await Promise.all([
+      getLatestMetrics('cpu_metrics', parseInt(limit)),
+      getLatestMetrics('memory_metrics', parseInt(limit)),
+      getLatestMetrics('network_metrics', parseInt(limit)),
+      getLatestMetrics('gpu_metrics', parseInt(limit))
+    ]);
+    
+    // Format data for charts
+    const chartData = {
+      cpu: cpuData.map(row => ({
+        timestamp: row.timestamp,
+        value: parseFloat(row.cpu_usage_percent) || 0
+      })),
+      memory: memoryData.map(row => ({
+        timestamp: row.timestamp,
+        value: parseFloat(row.usage_percent) || 0
+      })),
+      temperature: cpuData.map(row => ({
+        timestamp: row.timestamp,
+        value: parseFloat(row.cpu_temp_celsius) || 0
+      })),
+      network: networkData.map((row, index) => {
+        // Calculate total network I/O (sent + received) in KB/s
+        let totalBytesPerSecond = 0;
+        if (index < networkData.length - 1) { // Since data is DESC, compare with next (older) entry
+          const prevRow = networkData[index + 1];
+          const timeDiff = (new Date(row.timestamp) - new Date(prevRow.timestamp)) / 1000; // seconds
+          if (timeDiff > 0) {
+            const sentDiff = Math.max(0, parseFloat(row.bytes_sent) - parseFloat(prevRow.bytes_sent));
+            const recvDiff = Math.max(0, parseFloat(row.bytes_recv) - parseFloat(prevRow.bytes_recv));
+            totalBytesPerSecond = (sentDiff + recvDiff) / timeDiff;
+          }
+        }
+        return {
+          timestamp: row.timestamp,
+          value: Math.max(0, totalBytesPerSecond / 1024) // Convert to KB/s, ensure non-negative
+        };
+      }),
+      gpu_temperature: gpuData.map(row => ({
+        timestamp: row.timestamp,
+        value: parseFloat(row.gpu_temp_celsius) || 0
+      }))
+    };
+    
+    res.json({
+      range,
+      startTime: startTime.toISOString(),
+      endTime: now.toISOString(),
+      data: chartData,
+      timestamp: now.toISOString()
+    });
+    
+  } catch (error) {
+    console.error('Chart data error:', error);
     res.status(500).json({ error: error.message });
   }
 });

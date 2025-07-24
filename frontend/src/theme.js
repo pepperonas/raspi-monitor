@@ -99,44 +99,84 @@ export const darkTheme = {
   ...lightTheme,
   colors: {
     ...lightTheme.colors,
-    primary: '#3b82f6',
-    primaryHover: '#2563eb',
-    secondary: '#64748b',
-    success: '#10b981',
+    // Modern Dark Theme based on Material Design
+    primary: '#688db1',
+    primaryHover: '#5a7ba3',
+    secondary: '#9cb68f',
+    success: '#9cb68f',
     warning: '#f59e0b',
-    error: '#ef4444',
-    info: '#3b82f6',
+    error: '#e16162',
+    info: '#688db1',
     
-    background: '#0f172a',
-    surface: '#1e293b',
-    card: '#334155',
+    // Background colors from specification
+    background: '#2B2E3B',
+    backgroundDarker: '#252830',
+    surface: '#343845',
+    card: '#343845',
     
-    text: '#f8fafc',
-    textSecondary: '#cbd5e1',
+    // Text colors from specification
+    text: '#d1d5db',
+    textSecondary: '#9ca3af',
     textMuted: '#94a3b8',
     
-    border: '#374151',
-    borderLight: '#2d3748',
+    // Border colors
+    border: '#4a5568',
+    borderLight: '#3a4553',
     
-    shadow: 'rgba(0, 0, 0, 0.3)',
-    shadowLight: 'rgba(0, 0, 0, 0.2)',
+    // Shadow colors
+    shadow: 'rgba(0, 0, 0, 0.25)',
+    shadowLight: 'rgba(0, 0, 0, 0.15)',
     
-    // Status colors remain the same
-    online: '#10b981',
-    offline: '#ef4444',
+    // Status colors
+    online: '#9cb68f',
+    offline: '#e16162',
     warning: '#f59e0b',
     
-    // Chart colors (slightly adjusted for dark mode)
+    // Chart colors adjusted for dark theme
     chart: {
-      primary: '#3b82f6',
-      secondary: '#10b981',
+      primary: '#688db1',
+      secondary: '#9cb68f',
       accent: '#f59e0b',
-      danger: '#ef4444',
-      info: '#60a5fa',
+      danger: '#e16162',
+      info: '#688db1',
       purple: '#a78bfa',
       pink: '#f472b6',
-      gradient: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      gradient: 'linear-gradient(135deg, #688db1 0%, #9cb68f 100%)',
     },
+  },
+  
+  // Add CSS variables for consistent usage
+  cssVars: {
+    // Colors
+    '--background-dark': '#2B2E3B',
+    '--background-darker': '#252830',
+    '--card-background': '#343845',
+    '--accent-blue': '#688db1',
+    '--accent-green': '#9cb68f',
+    '--accent-red': '#e16162',
+    '--text-primary': '#d1d5db',
+    '--text-secondary': '#9ca3af',
+    
+    // Shadows
+    '--shadow-sm': '0 1px 2px 0 rgba(0, 0, 0, 0.15)',
+    '--shadow': '0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15)',
+    '--shadow-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15)',
+    
+    // Spacing
+    '--spacing-1': '0.25rem',
+    '--spacing-2': '0.5rem',
+    '--spacing-3': '0.75rem',
+    '--spacing-4': '1rem',
+    '--spacing-6': '1.5rem',
+    '--spacing-8': '2rem',
+    '--spacing-12': '3rem',
+    '--spacing-16': '4rem',
+    
+    // Border radius
+    '--radius-sm': '0.25rem',
+    '--radius': '0.5rem',
+    '--radius-lg': '0.75rem',
+    '--radius-xl': '1rem',
   },
 };
 

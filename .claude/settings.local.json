@@ -34,7 +34,9 @@
       "Bash(vcgencmd measure_temp:*)",
       "Bash(git push:*)",
       "Bash(node:*)",
-      "Bash(journalctl:*)"
+      "Bash(journalctl:*)",
+      "Bash(fuser:*)",
+      "Bash(systemctl status:*)"
     ],
     "deny": []
   }

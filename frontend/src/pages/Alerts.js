@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import { apiRequest } from '../config/api';
 
 const AlertsContainer = styled.div`
   padding: 20px;
@@ -25,16 +26,16 @@ const AlertItem = styled.div`
   border: 1px solid ${props => props.theme.colors.border};
   border-left: 4px solid ${props => {
     switch(props.severity) {
-      case 'critical': return '#ff6b6b';
-      case 'high': return '#ffa726';
-      case 'medium': return '#ffeb3b';
-      case 'low': return '#4caf50';
+      case 'critical': return '#e16162';
+      case 'high': return '#f59e0b';
+      case 'medium': return '#f59e0b';
+      case 'low': return '#9cb68f';
       default: return props.theme.colors.border;
     }
   }};
-  border-radius: 8px;
+  border-radius: 0.5rem;
   padding: 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
 `;
 
 const AlertHeader = styled.div`
@@ -85,12 +86,47 @@ const NoAlerts = styled.div`
 `;
 
 const Alerts = ({ alerts = [], isConnected = false }) => {
+  const [alertsData, setAlertsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        setLoading(true);
+        const data = await apiRequest('/api/alerts');
+        setAlertsData(data.alerts || data || []);
+      } catch (error) {
+        console.error('Failed to fetch alerts:', error);
+        setAlertsData(alerts);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 60000);
+
+    return () => clearInterval(interval);
+  }, [alerts]);
+
+  const currentAlerts = alertsData.length > 0 ? alertsData : alerts;
+
+  if (loading && currentAlerts.length === 0) {
+    return (
+      <AlertsContainer>
+        <PageTitle>Alerts</PageTitle>
+        <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
+          Loading alerts...
+        </div>
+      </AlertsContainer>
+    );
+  }
   const formatTimestamp = (timestamp) => {
     if (!timestamp) return 'Unknown';
     return new Date(timestamp).toLocaleString();
   };
 
-  if (alerts.length === 0) {
+  if (currentAlerts.length === 0) {
     return (
       <AlertsContainer>
         <PageTitle>Alerts</PageTitle>
@@ -105,7 +141,7 @@ const Alerts = ({ alerts = [], isConnected = false }) => {
     <AlertsContainer>
       <PageTitle>Alerts</PageTitle>
       <AlertsList>
-        {alerts.map((alert, index) => (
+        {currentAlerts.map((alert, index) => (
           <AlertItem key={index} severity={alert.severity}>
             <AlertHeader>
               <AlertType>{alert.alert_type || 'Unknown Alert'}</AlertType>

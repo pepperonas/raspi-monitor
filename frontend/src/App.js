@@ -9,6 +9,7 @@ import Header from './components/Layout/Header';
 import Sidebar from './components/Layout/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Metrics from './pages/Metrics';
+import Charts from './pages/Charts';
 import Alerts from './pages/Alerts';
 import System from './pages/System';
 import Settings from './pages/Settings';
@@ -29,7 +30,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', 'Oxygen',
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
       'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
       sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -75,6 +76,10 @@ const MainContent = styled.main`
   margin-left: ${props => props.sidebarOpen ? '280px' : '60px'};
   transition: margin-left 0.3s ease;
   min-height: 100vh;
+  
+  @media (max-width: 768px) {
+    margin-left: 0;
+  }
 `;
 
 const ContentArea = styled.div`
@@ -99,7 +104,7 @@ const queryClient = new QueryClient({
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
+    return saved ? JSON.parse(saved) : true;
   });
 
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -124,7 +129,7 @@ function App() {
 
     ws.on('disconnected', () => {
       setIsConnected(false);
-      console.log('❌ WebSocket disconnected');
+      console.log('❌ WebSocket disconnected - using REST API fallback');
     });
 
     ws.on('metrics', (data) => {
@@ -133,6 +138,11 @@ function App() {
 
     ws.on('alert', (data) => {
       setAlerts(prev => [data, ...prev.slice(0, 49)]); // Keep last 50 alerts
+    });
+
+    ws.on('maxReconnectAttemptsReached', () => {
+      console.log('📡 WebSocket failed - falling back to REST API polling');
+      setIsConnected(false);
     });
 
     ws.connect();
@@ -196,6 +206,15 @@ function App() {
                     path="/metrics" 
                     element={
                       <Metrics 
+                        metrics={metrics}
+                        isConnected={isConnected}
+                      />
+                    } 
+                  />
+                  <Route 
+                    path="/charts" 
+                    element={
+                      <Charts 
                         metrics={metrics}
                         isConnected={isConnected}
                       />
