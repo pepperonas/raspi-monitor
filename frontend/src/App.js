@@ -77,7 +77,7 @@ const MainContent = styled.main`
   transition: margin-left 0.3s ease;
   min-height: 100vh;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     margin-left: 0;
   }
 `;
@@ -118,7 +118,8 @@ function App() {
 
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('sidebarOpen');
-    return saved ? JSON.parse(saved) : true;
+    const isMobile = window.innerWidth <= 1024;
+    return saved ? JSON.parse(saved) : !isMobile;
   });
 
   const [isConnected, setIsConnected] = useState(false);

@@ -15,10 +15,28 @@ const SidebarContainer = styled.nav`
   overflow: hidden;
   box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
   
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     transform: ${props => props.isOpen ? 'translateX(0)' : 'translateX(-100%)'};
     width: 280px;
     transition: transform 0.3s ease;
+    box-shadow: ${props => props.isOpen ? '2px 0 20px rgba(0, 0, 0, 0.5)' : 'none'};
+  }
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: ${props => props.visible ? '1' : '0'};
+  visibility: ${props => props.visible ? 'visible' : 'hidden'};
+  transition: all 0.3s ease;
+  
+  @media (min-width: 1025px) {
+    display: none;
   }
 `;
 
@@ -103,27 +121,38 @@ const Sidebar = ({ isOpen, onToggle }) => {
     { path: '/settings', icon: '🔧', text: 'Settings' }
   ];
 
+  const handleLinkClick = () => {
+    // Close sidebar on mobile when a link is clicked
+    if (window.innerWidth <= 1024) {
+      onToggle();
+    }
+  };
+
   return (
-    <SidebarContainer isOpen={isOpen}>
-      <SidebarHeader>
-        <Logo>🔥</Logo>
-        <SidebarTitle isOpen={isOpen}>Pi Monitor</SidebarTitle>
-      </SidebarHeader>
-      
-      <NavigationList>
-        {navigationItems.map((item) => (
-          <NavigationItem key={item.path}>
-            <NavigationLink 
-              to={item.path} 
-              active={location.pathname === item.path}
-            >
-              <NavigationIcon>{item.icon}</NavigationIcon>
-              <NavigationText isOpen={isOpen}>{item.text}</NavigationText>
-            </NavigationLink>
-          </NavigationItem>
-        ))}
-      </NavigationList>
-    </SidebarContainer>
+    <>
+      <Overlay visible={isOpen} onClick={onToggle} />
+      <SidebarContainer isOpen={isOpen}>
+        <SidebarHeader>
+          <Logo>🔥</Logo>
+          <SidebarTitle isOpen={isOpen}>Pi Monitor</SidebarTitle>
+        </SidebarHeader>
+        
+        <NavigationList>
+          {navigationItems.map((item) => (
+            <NavigationItem key={item.path}>
+              <NavigationLink 
+                to={item.path} 
+                active={location.pathname === item.path}
+                onClick={handleLinkClick}
+              >
+                <NavigationIcon>{item.icon}</NavigationIcon>
+                <NavigationText isOpen={isOpen}>{item.text}</NavigationText>
+              </NavigationLink>
+            </NavigationItem>
+          ))}
+        </NavigationList>
+      </SidebarContainer>
+    </>
   );
 };
 
