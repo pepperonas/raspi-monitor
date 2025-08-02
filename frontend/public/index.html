@@ -22,26 +22,35 @@
     <meta name="theme-color" content="#2c2e3b">
     <meta name="color-scheme" content="dark">
     
-    <!-- Favicon & App Icons -->
-    <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png">
+    <!-- Samsung Browser & Android specific -->
+    <meta name="msapplication-TileColor" content="#2c2e3b">
+    <meta name="msapplication-TileImage" content="%PUBLIC_URL%/apple-touch-icon.png">
+    <meta name="msapplication-square70x70logo" content="%PUBLIC_URL%/apple-touch-icon.png">
+    <meta name="msapplication-square150x150logo" content="%PUBLIC_URL%/apple-touch-icon.png">
+    <meta name="msapplication-square310x310logo" content="%PUBLIC_URL%/apple-touch-icon.png">
     
-    <!-- Apple Touch Icons for Homescreen -->
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="57x57" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="72x72" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="76x76" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="114x114" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="144x144" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="%PUBLIC_URL%/apple-touch-icon.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png" />
+    <!-- Additional Android Chrome meta tags -->
+    <meta name="mobile-web-app-title" content="Raspi Monitor">
+    <meta name="mobile-web-app-status-bar-style" content="black-translucent">
     
-    <!-- Android Icons for Homescreen -->
+    <!-- Primary Icons (Samsung Browser S24 Ultra priority) with cache busting -->
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico?v=2025080201" type="image/x-icon">
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico?v=2025080201" type="image/x-icon">
+    
+    <!-- Apple Touch Icons for iOS and Samsung fallback -->
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png?v=2025080201">
+    <link rel="apple-touch-icon" sizes="180x180" href="%PUBLIC_URL%/apple-touch-icon.png?v=2025080201">
+    
+    <!-- Samsung Browser S24 Ultra specific icons -->
     <link rel="icon" type="image/png" sizes="192x192" href="%PUBLIC_URL%/android-chrome-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="%PUBLIC_URL%/android-chrome-512x512.png">
-    <link rel="shortcut icon" href="%PUBLIC_URL%/apple-touch-icon.png" />
+    <link rel="mask-icon" href="%PUBLIC_URL%/apple-touch-icon.png" color="#2c2e3b">
+    
+    <!-- Standard sizes for broad compatibility -->
+    <link rel="icon" type="image/png" sizes="16x16" href="%PUBLIC_URL%/favicon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="%PUBLIC_URL%/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="%PUBLIC_URL%/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="144x144" href="%PUBLIC_URL%/apple-touch-icon.png">
     
     <!-- PWA Manifest -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
