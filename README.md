@@ -24,6 +24,7 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 - **📋 Alerts**: Intelligente Benachrichtigungen bei kritischen Systemzuständen
 - **🌐 Network I/O**: Echtzeit-Netzwerktraffic in KB/s
 - **🕐 Deutsche Zeitzone**: Korrekte Zeitanzeige (Europe/Berlin)
+- **📲 PWA Support**: Installierbar als App mit korrekten Favicons und Icons
 
 ## 🖥️ Screenshots
 
