@@ -24,7 +24,7 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 - **📋 Alerts**: Intelligente Benachrichtigungen bei kritischen Systemzuständen
 - **🌐 Network I/O**: Echtzeit-Netzwerktraffic in KB/s
 - **🕐 Deutsche Zeitzone**: Korrekte Zeitanzeige (Europe/Berlin)
-- **📲 PWA Support**: Installierbar als App mit korrekten Favicons und Icons
+- **📲 PWA Support**: Installierbar als App mit optimierten Favicons für Samsung S24 Ultra
 
 ## 🖥️ Screenshots
 
@@ -278,6 +278,25 @@ tail -f logs/error.log
 # PM2 Logs
 pm2 logs raspi-monitor
 ```
+
+## 📝 Changelog
+
+### Version 2.1 (August 2025 - Aktuell)
+- ✅ **Favicon-Optimierung**: Vollständige Samsung S24 Ultra-Kompatibilität für Homescreen-Verknüpfungen
+- ✅ **PWA-Enhancement**: Erweiterte Meta-Tags und Icons für optimale mobile App-Erfahrung
+- ✅ **Manifest.json Update**: Korrekte Icon-Pfade für alle verfügbaren Favicon-Größen
+
+### Version 2.0
+- ✅ Echtzeit-WebSocket-Verbindungen
+- ✅ Interaktive Chart.js-Diagramme  
+- ✅ Raspberry Pi 5 Lüfter-Überwachung
+- ✅ MySQL-Datenbank-Integration
+- ✅ Responsive Material Design UI
+
+### Version 1.0
+- ✅ Basis-Systemüberwachung
+- ✅ REST API-Implementierung
+- ✅ PM2-Integration
 
 ## 🤝 Contributing
 
