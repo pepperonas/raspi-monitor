@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Metrics from './pages/Metrics';
 import Charts from './pages/Charts';
 import Alerts from './pages/Alerts';
+import Tasks from './pages/Tasks';
 import System from './pages/System';
 import Settings from './pages/Settings';
 
@@ -235,6 +236,14 @@ function App() {
                     element={
                       <Alerts 
                         alerts={alerts}
+                        isConnected={isConnected}
+                      />
+                    } 
+                  />
+                  <Route 
+                    path="/tasks" 
+                    element={
+                      <Tasks 
                         isConnected={isConnected}
                       />
                     } 

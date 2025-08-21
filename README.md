@@ -16,7 +16,10 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 
 - **📈 Echtzeit-Monitoring**: Live-Überwachung von CPU, Speicher, Festplatte und Netzwerk (1-Sekunden-Updates)
 - **📊 Historische Charts**: Interaktive Datenvisualisierung mit Recharts (1h, 6h, 24h, 7d)
+- **⚡ Task Manager**: Vollständige Prozess-Überwachung mit sortbaren Spalten (CPU, RAM, Netzwerk)
+- **🔄 Intelligente Sortierung**: Einfache Ein-Klick-Sortierung (aufsteigend/absteigend) ohne komplexe Mehrfachsortierung
 - **🌀 Lüfter-Status**: Raspberry Pi 5 Lüfterüberwachung (Level 0-4)
+- **💡 LED-Kontrolle**: Raspberry Pi LED-Steuerung (ACT/PWR) temporär und permanent
 - **🔥 Modern Dark Theme**: Elegante Benutzeroberfläche mit Material Design
 - **📱 Responsive**: Optimiert für Desktop und mobile Geräte
 - **🚀 WebSocket**: Echtzeitübertragung der Systemdaten mit automatischer Wiederverbindung
@@ -45,6 +48,20 @@ Eine moderne Echtzeit-Systemüberwachung für Raspberry Pi mit eleganter Benutze
 - Zeitbereich-Selektor (1h, 6h, 24h, 7d)
 - Deutsche Zeitzone (Europe/Berlin)
 - Responsive Design für alle Geräte
+
+### Tasks
+- **Vollständiger Prozess-Manager** mit echten System-Daten
+- **Sortierbare Spalten**: CPU, RAM, Netzwerk-Aktivität
+- **Ein-Klick-Sortierung**: Aufsteigend/Absteigend ohne komplexe Mehrfachsortierung
+- **Auto-Refresh**: Alle 5 Sekunden mit Sortierung-Persistierung
+- **Intelligente Netzwerk-Scores**: Basierend auf Prozesstyp und Aktivität
+- **Gefilterte Anzeige**: Keine Kernel-Threads, nur relevante Prozesse
+- **Process-Status**: PID, User, Command, RSS Memory, Status
+
+### System
+- **LED-Kontrolle**: Raspberry Pi ACT/PWR LEDs temporär und permanent steuern
+- **System-Informationen**: Hostname, Platform, Architecture, Kernel
+- **Connection-Status**: Live WebSocket-Verbindungsstatus
 
 ## 🛠️ Installation
 
@@ -172,6 +189,9 @@ Die Monitor-App ist über zwei URLs erreichbar:
 
 #### System
 - `GET /api/system/info` - Systeminformationen
+- `GET /api/system/processes` - Laufende Prozesse mit Sortierung
+- `GET /api/system/uptime` - System-Uptime-Informationen
+- `POST /api/system/led-control` - Raspberry Pi LED-Steuerung
 - `GET /api/health` - Gesundheitsstatus der Anwendung
 
 #### Alerts
@@ -212,8 +232,12 @@ Das System sammelt folgende Metriken:
   - Status (on/off/unknown)
 
 ### Processes
-- Anzahl laufende/schlafende/zombie Prozesse
-- CPU/Memory-Nutzung der Top-Prozesse
+- **Echtzeit-Prozess-Monitoring** mit nativer ps-Sortierung
+- **CPU/Memory-Nutzung** der ressourcenintensivsten Prozesse
+- **Netzwerk-Aktivität-Scores** basierend auf Prozesstyp und CPU/Memory-Verbrauch
+- **Filterung**: Kernel-Threads ausgeblendet, nur relevante User-Prozesse
+- **Sortierung**: CPU (desc/asc), Memory (desc/asc), Network (desc/asc)
+- **Auto-Update**: Alle 5 Sekunden mit Sortierung-Persistierung
 
 ## 🔧 Development
 
@@ -281,7 +305,17 @@ pm2 logs raspi-monitor
 
 ## 📝 Changelog
 
-### Version 2.1 (August 2025 - Aktuell)
+### Version 2.2 (August 2025 - Aktuell)
+- ✅ **Task Manager**: Vollständiger Prozess-Manager mit echten System-Daten
+- ✅ **Intelligente Sortierung**: Ein-Klick CPU/RAM/Netzwerk-Sortierung (aufsteigend/absteigend)
+- ✅ **Native ps-Integration**: Backend nutzt native ps-Sortierung für perfekte Performance
+- ✅ **Netzwerk-Scores**: Intelligente Netzwerk-Aktivität basierend auf Prozesstyp
+- ✅ **Auto-Refresh**: 5-Sekunden-Updates mit Sortierung-Persistierung
+- ✅ **Process-Filtering**: Kernel-Threads herausgefiltert, nur relevante User-Prozesse
+- ✅ **LED-Kontrolle**: Raspberry Pi ACT/PWR LED-Steuerung (temporär/permanent)
+- ✅ **System-Optimierung**: Saubere Trennung von System- und Task-Management
+
+### Version 2.1 (August 2025)
 - ✅ **Favicon-Optimierung**: Vollständige Samsung S24 Ultra-Kompatibilität für Homescreen-Verknüpfungen
 - ✅ **PWA-Enhancement**: Erweiterte Meta-Tags und Icons für optimale mobile App-Erfahrung
 - ✅ **Manifest.json Update**: Korrekte Icon-Pfade für alle verfügbaren Favicon-Größen

@@ -3,7 +3,7 @@ module.exports = {
     {
       name: 'raspi-monitor',
       script: 'backend/src/server.js',
-      cwd: '/home/martin/apps/raspi-monitor',
+      cwd: '/home/pi/apps/raspi-monitor',
       
       // Instance configuration
       instances: 1,
@@ -57,9 +57,9 @@ module.exports = {
       max_memory_restart: '200M',
       
       // Logging
-      log_file: '/home/martin/apps/raspi-monitor/backend/logs/combined.log',
-      out_file: '/home/martin/apps/raspi-monitor/backend/logs/out.log',
-      error_file: '/home/martin/apps/raspi-monitor/backend/logs/error.log',
+      log_file: '/home/pi/apps/raspi-monitor/backend/logs/combined.log',
+      out_file: '/home/pi/apps/raspi-monitor/backend/logs/out.log',
+      error_file: '/home/pi/apps/raspi-monitor/backend/logs/error.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       
       // Merge logs from all instances
@@ -103,7 +103,7 @@ module.exports = {
       host: 'localhost',
       ref: 'origin/main',
       repo: 'git@github.com:user/raspi-monitor.git',
-      path: '/home/martin/apps/raspi-monitor',
+      path: '/home/pi/apps/raspi-monitor',
       'post-deploy': 'npm install --production && npm run build && pm2 reload ecosystem.config.js --env production'
     }
   }

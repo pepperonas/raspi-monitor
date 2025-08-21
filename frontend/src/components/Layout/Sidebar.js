@@ -117,6 +117,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
     { path: '/metrics', icon: '📈', text: 'Metrics' },
     { path: '/charts', icon: '📋', text: 'Charts' },
     { path: '/alerts', icon: '🚨', text: 'Alerts' },
+    { path: '/tasks', icon: '⚡', text: 'Tasks' },
     { path: '/system', icon: '⚙️', text: 'System' },
     { path: '/settings', icon: '🔧', text: 'Settings' }
   ];
