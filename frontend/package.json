@@ -1,6 +1,6 @@
 {
   "name": "raspi-monitor-frontend",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Raspberry Pi System Monitor Frontend Dashboard",
   "private": true,
   "dependencies": {

@@ -303,9 +303,39 @@ tail -f logs/error.log
 pm2 logs raspi-monitor
 ```
 
+## 📦 Installation & Download
+
+### 🚀 Schnell-Installation (empfohlen)
+```bash
+curl -fsSL https://github.com/pepperonas/raspi-monitor/releases/latest/download/install.sh | bash
+```
+
+### 📥 Manueller Download
+1. **Neueste Version herunterladen**: [Releases](https://github.com/pepperonas/raspi-monitor/releases)
+2. **Archiv entpacken**: `tar -xzf raspi-monitor-v0.1.0.tar.gz`
+3. **Installation starten**: `cd raspi-monitor-v0.1.0 && ./install.sh`
+
+### 🔄 Update bestehender Installation
+```bash
+# Das Install-Script erkennt automatisch bestehende Installationen
+curl -fsSL https://github.com/pepperonas/raspi-monitor/releases/latest/download/install.sh | bash
+```
+
+### 🛠️ Für Entwickler
+```bash
+# Version erhöhen und Release erstellen
+node scripts/version-manager.js release patch
+
+# Nur Version erhöhen (ohne Release)
+node scripts/version-manager.js bump minor
+
+# Status anzeigen
+node scripts/version-manager.js status
+```
+
 ## 📝 Changelog
 
-### Version 2.2 (August 2025 - Aktuell)
+### Version 0.1.0 (August 2025 - Aktuell)
 - ✅ **Task Manager**: Vollständiger Prozess-Manager mit echten System-Daten
 - ✅ **Intelligente Sortierung**: Ein-Klick CPU/RAM/Netzwerk-Sortierung (aufsteigend/absteigend)
 - ✅ **Native ps-Integration**: Backend nutzt native ps-Sortierung für perfekte Performance

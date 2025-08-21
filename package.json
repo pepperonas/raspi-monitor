@@ -1,0 +1,55 @@
+{
+  "name": "raspi-monitor",
+  "version": "0.1.0",
+  "description": "Raspberry Pi System Monitor - Complete monitoring solution with real-time dashboard and task management",
+  "main": "backend/src/server.js",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install": "npm install --workspaces",
+    "build": "npm run build --workspace=frontend",
+    "start": "npm run start --workspace=backend",
+    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run start --workspace=frontend\"",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspace=backend",
+    "pm2:start": "cd backend && npm run pm2:start",
+    "pm2:stop": "cd backend && npm run pm2:stop",
+    "pm2:restart": "cd backend && npm run pm2:restart",
+    "pm2:logs": "cd backend && npm run pm2:logs",
+    "version:patch": "npm version patch && npm version patch --workspace=backend && npm version patch --workspace=frontend",
+    "version:minor": "npm version minor && npm version minor --workspace=backend && npm version minor --workspace=frontend",
+    "version:major": "npm version major && npm version major --workspace=backend && npm version major --workspace=frontend",
+    "release": "npm run build && npm run version:patch",
+    "postversion": "git push && git push --tags"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pepperonas/raspi-monitor.git"
+  },
+  "keywords": [
+    "raspberry-pi",
+    "monitoring",
+    "system",
+    "performance",
+    "dashboard",
+    "task-manager",
+    "led-control",
+    "real-time"
+  ],
+  "author": "Martin Pfeffer",
+  "license": "MIT",
+  "homepage": "https://github.com/pepperonas/raspi-monitor#readme",
+  "bugs": {
+    "url": "https://github.com/pepperonas/raspi-monitor/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
