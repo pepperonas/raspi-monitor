@@ -124,9 +124,8 @@ PORT=4999
 NODE_ENV=production
 
 # ✅ AKTUELL AKTIV: 
-# - Subdomain-Zugriff über http://monitor.pi.local (nginx Port 80)
-# - IP-Zugriff über http://192.168.2.132:4999 (nginx Port 4999)
-# - App läuft intern auf Port 5004
+# - Direkt-Zugriff über http://192.168.2.134:4999
+# - App läuft direkt auf Port 4999 (PM2)
 
 # Datenbank
 DB_HOST=localhost
@@ -171,14 +170,13 @@ WantedBy=multi-user.target
 ## 🚀 Verwendung
 
 ### Web-Interface
-- **Dashboard**: `http://monitor.pi.local` oder `http://192.168.2.132:4999/`
-- **Charts**: `http://monitor.pi.local/charts.html`
-- **API**: `http://monitor.pi.local/api/`
+- **Dashboard**: `http://192.168.2.134:4999/`
+- **Charts**: `http://192.168.2.134:4999/charts.html`
+- **API**: `http://192.168.2.134:4999/api/`
 
 ### Zugriff
-Die Monitor-App ist über zwei URLs erreichbar:
-- **Domain**: `http://monitor.pi.local` (über nginx Subdomain-Konfiguration)
-- **IP + Port**: `http://192.168.2.132:4999` (direkter nginx-Proxy auf Port 4999)
+Die Monitor-App ist erreichbar über:
+- **IP + Port**: `http://192.168.2.134:4999` (direkte Verbindung über PM2)
 
 ### API Endpoints
 
@@ -335,7 +333,7 @@ node scripts/version-manager.js status
 
 ## 📝 Changelog
 
-### Version 0.1.0 (August 2025 - Aktuell)
+### Version 0.1.0 (September 2025 - Aktuell)
 - ✅ **Task Manager**: Vollständiger Prozess-Manager mit echten System-Daten
 - ✅ **Intelligente Sortierung**: Ein-Klick CPU/RAM/Netzwerk-Sortierung (aufsteigend/absteigend)
 - ✅ **Native ps-Integration**: Backend nutzt native ps-Sortierung für perfekte Performance
@@ -344,6 +342,8 @@ node scripts/version-manager.js status
 - ✅ **Process-Filtering**: Kernel-Threads herausgefiltert, nur relevante User-Prozesse
 - ✅ **LED-Kontrolle**: Raspberry Pi ACT/PWR LED-Steuerung (temporär/permanent)
 - ✅ **System-Optimierung**: Saubere Trennung von System- und Task-Management
+- ✅ **Netzwerk-Fix**: IP-Adresse auf 192.168.2.134:4999 aktualisiert
+- ✅ **Firewall-Setup**: iptables-Regel für externen Zugriff konfiguriert
 
 ### Version 2.1 (August 2025)
 - ✅ **Favicon-Optimierung**: Vollständige Samsung S24 Ultra-Kompatibilität für Homescreen-Verknüpfungen

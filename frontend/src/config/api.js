@@ -13,9 +13,9 @@ if (isDevServer) {
   API_BASE_URL = 'http://localhost:5004';
   WS_BASE_URL = 'ws://localhost:5004';
 } else {
-  // Production: Always use 192.168.2.132:4999 (nginx proxy)
-  API_BASE_URL = 'http://192.168.2.132:4999';
-  WS_BASE_URL = 'ws://192.168.2.132:4999';
+  // Production: Always use 192.168.2.134:4999 (nginx proxy)
+  API_BASE_URL = 'http://192.168.2.134:4999';
+  WS_BASE_URL = 'ws://192.168.2.134:4999';
 }
 
 export { API_BASE_URL, WS_BASE_URL };
