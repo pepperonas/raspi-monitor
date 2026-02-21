@@ -57,7 +57,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
       imgSrc: ["'self'", "data:", "https:"],
-      connectSrc: ["'self'", "http://192.168.2.132:4999", "http://localhost:4999", "http://monitor.pi.local", "ws://192.168.2.132:4999", "ws://localhost:4999", "ws:", "wss:"],
+      connectSrc: ["'self'", "http://192.168.178.105", "http://192.168.178.105:4999", "http://localhost:4999", "ws://192.168.178.105", "ws://192.168.178.105:4999", "ws://localhost:4999", "ws:", "wss:"],
       upgradeInsecureRequests: null
     }
   },

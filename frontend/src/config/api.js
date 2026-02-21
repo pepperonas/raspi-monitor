@@ -1,7 +1,7 @@
-// API Configuration - Always use localhost:4999 for production
+// API Configuration - Dynamic, works behind any proxy
 const currentHost = window.location.host;
-const protocol = window.location.protocol === 'https:' ? 'https:' : 'http:';
-const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const protocol = window.location.protocol;
+const wsProtocol = protocol === 'https:' ? 'wss:' : 'ws:';
 
 // Check if we're running on development server
 const isDevServer = currentHost.includes(':3000') || currentHost.includes('localhost:3000');
@@ -9,21 +9,20 @@ const isDevServer = currentHost.includes(':3000') || currentHost.includes('local
 let API_BASE_URL, WS_BASE_URL;
 
 if (isDevServer) {
-  // Development: Connect directly to backend
-  API_BASE_URL = 'http://localhost:5004';
-  WS_BASE_URL = 'ws://localhost:5004';
+  API_BASE_URL = 'http://localhost:4999';
+  WS_BASE_URL = 'ws://localhost:4999';
 } else {
-  // Production: Always use 192.168.2.134:4999 (nginx proxy)
-  API_BASE_URL = 'http://192.168.2.134:4999';
-  WS_BASE_URL = 'ws://192.168.2.134:4999';
+  // Production: use same origin (nginx proxies /api/ to monitor backend)
+  API_BASE_URL = protocol + '//' + currentHost;
+  WS_BASE_URL = wsProtocol + '//' + currentHost + '/ws';
 }
 
 export { API_BASE_URL, WS_BASE_URL };
 
 // API helper functions
 export const apiRequest = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
+  const url = API_BASE_URL + endpoint;
+
   const defaultOptions = {
     headers: {
       'Content-Type': 'application/json',
@@ -41,11 +40,11 @@ export const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, mergedOptions);
-    
+
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error('HTTP error! status: ' + response.status);
     }
-    
+
     return await response.json();
   } catch (error) {
     console.error('API request failed:', error);

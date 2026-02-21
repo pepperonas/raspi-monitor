@@ -1,6 +1,6 @@
 {
   "name": "raspi-monitor-frontend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Raspberry Pi System Monitor Frontend Dashboard",
   "private": true,
   "dependencies": {
@@ -44,5 +44,6 @@
   "devDependencies": {
     "serve": "^14.2.0"
   },
-  "proxy": "http://localhost:4999"
+  "proxy": "http://localhost:4999",
+  "homepage": "."
 }

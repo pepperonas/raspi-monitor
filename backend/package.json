@@ -1,6 +1,6 @@
 {
   "name": "raspi-monitor-backend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Raspberry Pi System Monitor Backend API",
   "main": "src/server.js",
   "scripts": {
@@ -18,7 +18,12 @@
     "pm2:logs": "pm2 logs raspi-monitor",
     "pm2:status": "pm2 status"
   },
-  "keywords": ["raspberry-pi", "monitoring", "system", "performance"],
+  "keywords": [
+    "raspberry-pi",
+    "monitoring",
+    "system",
+    "performance"
+  ],
   "author": "Martin",
   "license": "MIT",
   "dependencies": {

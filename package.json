@@ -1,6 +1,6 @@
 {
   "name": "raspi-monitor",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Raspberry Pi System Monitor - Complete monitoring solution with real-time dashboard and task management",
   "main": "backend/src/server.js",
   "private": true,
