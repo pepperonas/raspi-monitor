@@ -213,3 +213,6 @@ pnpm-lock.yaml
 
 # Runtime configuration
 runtime.json
+# Go backend
+/raspi-monitor
+bin/

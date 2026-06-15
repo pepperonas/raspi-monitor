@@ -1,0 +1,17 @@
+[Unit]
+Description=Raspi Monitor (Go) — system metrics + React UI
+After=network-online.target mariadb.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Environment=PORT=4999
+Environment=FRONTEND_DIR=/home/pi/apps/raspi-monitor/frontend/build
+WorkingDirectory=/home/pi/apps/raspi-monitor
+ExecStart=/home/pi/apps/raspi-monitor/raspi-monitor
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
