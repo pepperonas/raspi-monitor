@@ -216,3 +216,4 @@ runtime.json
 # Go backend
 /raspi-monitor
 bin/
+frontend/build/raspi-monitor-build/

@@ -1,5 +1,10 @@
 # Raspi Monitor
 
+> **⚡ Update 2026-06 — Stack & UI**
+>
+> - **Backend:** **Go-Binary** (~12 MB, migriert von Node/Express; war ~100 MB). **gopsutil**-Collector → MariaDB alle 5 s, Threshold-Alerts, WebSocket, serviert das React-Frontend. Gleicher `/api`+`/ws`-Vertrag (decimals als Strings, ISO-UTC). **systemd** `raspi-monitor`. Source: `main.go` (+ `/Users/martin/claude/raspi-monitor-go/`). Node-`backend/` bleibt als Rollback.
+> - **Deploy:** Binary bauen (arm64) → `scp` → `sudo systemctl restart raspi-monitor`
+
 <div align="center">
 
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
