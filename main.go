@@ -6,6 +6,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -81,7 +82,9 @@ func convert(v any, dbType string) any {
 }
 
 func queryRows(q string, args ...any) ([]map[string]any, error) {
-	rows, err := db.Query(q, args...)
+	ctx, cancel := context.WithTimeout(context.Background(), 8*time.Second)
+	defer cancel()
+	rows, err := db.QueryContext(ctx, q, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -276,8 +279,12 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 	}
 	end := time.Now().UTC()
 	start := end.Add(-dur)
+	secs := int(dur.Seconds())
 	series := func(table, col string) []map[string]any {
-		rows, err := queryRows("SELECT timestamp, "+col+" AS v FROM "+table+" WHERE timestamp >= ? ORDER BY timestamp DESC LIMIT 2000", start)
+		// DB-side interval literal (uses the timestamp index; a bound time.Time
+		// param made MariaDB full-scan + filesort instead).
+		q := fmt.Sprintf("SELECT timestamp, %s AS v FROM %s WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL %d SECOND) ORDER BY timestamp DESC LIMIT 2000", col, table, secs)
+		rows, err := queryRows(q)
 		out := []map[string]any{}
 		if err != nil {
 			return out
@@ -299,10 +306,10 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{
 		"range": rng, "startTime": isoUTC(start), "endTime": isoUTC(end),
 		"data": map[string]any{
-			"cpu":     series("cpu_metrics", "cpu_usage_percent"),
-			"memory":  series("memory_metrics", "usage_percent"),
-			"temp":    series("cpu_metrics", "cpu_temp_celsius"),
-			"network": series("network_metrics", "bytes_recv"),
+			"cpu":         series("cpu_metrics", "cpu_usage_percent"),
+			"memory":      series("memory_metrics", "usage_percent"),
+			"temperature": series("cpu_metrics", "cpu_temp_celsius"),
+			"network":     series("network_metrics", "bytes_recv"),
 		},
 	})
 }
@@ -453,7 +460,7 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 func main() {
 	port := env("PORT", "4999")
 	frontendDir = env("FRONTEND_DIR", "frontend/build")
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true&loc=UTC&time_zone=%%27%%2B00%%3A00%%27",
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true&loc=UTC&interpolateParams=true&time_zone=%%27%%2B00%%3A00%%27",
 		env("DB_USER", "raspi_monitor"), env("DB_PASSWORD", "monitoring_secure_pass_2024"),
 		env("DB_HOST", "127.0.0.1"), env("DB_NAME", "raspi_monitor"))
 	var err error
