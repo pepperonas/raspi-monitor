@@ -62,6 +62,17 @@ const GlobalStyle = createGlobalStyle`
   ::-webkit-scrollbar-thumb:hover {
     background: ${props => props.theme.colors.textSecondary};
   }
+
+  /* ===== Obsessive-Detail Politur (2026-06-16) — additiv, kein Umbau ===== */
+  button:focus-visible,a[href]:focus-visible,input:focus-visible,select:focus-visible,[role="button"]:focus-visible,[tabindex]:not([tabindex="-1"]):focus-visible{
+    outline:2px solid var(--accent, var(--primary, #aac7ff)); outline-offset:3px; border-radius:10px;
+  }
+  button:focus:not(:focus-visible),a:focus:not(:focus-visible){ outline:none; }
+  h1,h2,h3{ text-wrap:balance; }
+  @media (pointer:coarse){ button,[role="button"]{ min-height:44px; } }
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
+  }
 `;
 
 const AppContainer = styled.div`
