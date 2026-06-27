@@ -280,12 +280,34 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 	end := time.Now().UTC()
 	start := end.Add(-dur)
 	secs := int(dur.Seconds())
+	// Downsample by SAMPLING ~targetPoints evenly-spaced rows by primary key.
+	// Grouping/AVG over the full window (122k rows for 7d) caused a 32s full
+	// table scan; reading ~200 rows by PK (IN-list) is sub-100ms and spans the
+	// whole range. Rows are inserted at a fixed interval, so even id-spacing ≈
+	// even time-spacing.
+	const targetPoints = 200
 	series := func(table, col string) []map[string]any {
-		// DB-side interval literal (uses the timestamp index; a bound time.Time
-		// param made MariaDB full-scan + filesort instead).
-		q := fmt.Sprintf("SELECT timestamp, %s AS v FROM %s WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL %d SECOND) ORDER BY timestamp DESC LIMIT 2000", col, table, secs)
-		rows, err := queryRows(q)
 		out := []map[string]any{}
+		var lo, hi sql.NullInt64
+		// first id in the window (uses the timestamp index) + latest id (instant)
+		db.QueryRow(fmt.Sprintf("SELECT id FROM %s WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL %d SECOND) ORDER BY timestamp ASC LIMIT 1", table, secs)).Scan(&lo)
+		db.QueryRow(fmt.Sprintf("SELECT MAX(id) FROM %s", table)).Scan(&hi)
+		if !lo.Valid || !hi.Valid || hi.Int64 <= lo.Int64 {
+			return out
+		}
+		step := (hi.Int64 - lo.Int64) / targetPoints
+		if step < 1 {
+			step = 1
+		}
+		var sb strings.Builder
+		for id := lo.Int64; id <= hi.Int64; id += step {
+			if sb.Len() > 0 {
+				sb.WriteByte(',')
+			}
+			sb.WriteString(strconv.FormatInt(id, 10))
+		}
+		q := fmt.Sprintf("SELECT timestamp, %s AS v FROM %s WHERE id IN (%s) ORDER BY id ASC", col, table, sb.String())
+		rows, err := queryRows(q)
 		if err != nil {
 			return out
 		}

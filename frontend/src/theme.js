@@ -99,29 +99,29 @@ export const darkTheme = {
   ...lightTheme,
   colors: {
     ...lightTheme.colors,
-    // Modern Dark Theme based on Material Design
-    primary: '#688db1',
-    primaryHover: '#5a7ba3',
+    // Material Design 3 Expressive (matching the other raspi3 apps)
+    primary: '#b3c5ff',
+    primaryHover: '#9fb4f5',
     secondary: '#9cb68f',
     success: '#9cb68f',
     warning: '#f59e0b',
     error: '#e16162',
     info: '#688db1',
     
-    // Background colors from specification
-    background: '#2B2E3B',
-    backgroundDarker: '#252830',
-    surface: '#343845',
-    card: '#343845',
-    
-    // Text colors from specification
-    text: '#d1d5db',
-    textSecondary: '#9ca3af',
-    textMuted: '#94a3b8',
-    
-    // Border colors
-    border: '#4a5568',
-    borderLight: '#3a4553',
+    // MD3 Expressive tonal dark surfaces
+    background: '#121318',
+    backgroundDarker: '#0d0e12',
+    surface: '#1c1d23',
+    card: '#1c1d23',
+
+    // MD3 on-surface text
+    text: '#e4e2e9',
+    textSecondary: '#c5c6d0',
+    textMuted: '#8e9099',
+
+    // MD3 outline
+    border: '#44464f',
+    borderLight: '#2a2b31',
     
     // Shadow colors
     shadow: 'rgba(0, 0, 0, 0.25)',
@@ -134,14 +134,14 @@ export const darkTheme = {
     
     // Chart colors adjusted for dark theme
     chart: {
-      primary: '#688db1',
+      primary: '#b3c5ff',
       secondary: '#9cb68f',
       accent: '#f59e0b',
       danger: '#e16162',
-      info: '#688db1',
-      purple: '#a78bfa',
+      info: '#b3c5ff',
+      purple: '#d0bcff',
       pink: '#f472b6',
-      gradient: 'linear-gradient(135deg, #688db1 0%, #9cb68f 100%)',
+      gradient: 'linear-gradient(135deg, #b3c5ff 0%, #9cb68f 100%)',
     },
   },
   

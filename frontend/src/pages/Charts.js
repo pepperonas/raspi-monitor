@@ -8,26 +8,37 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer
 } from 'recharts';
 
+// ---- formatting helpers ----------------------------------------------------
+const humanRate = (bps) => {
+  if (bps === null || bps === undefined || isNaN(bps)) return '--';
+  const u = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+  let v = Math.max(0, bps), i = 0;
+  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+  return `${v.toFixed(v >= 100 || i === 0 ? 0 : 1)} ${u[i]}`;
+};
+
+const ACCENT = { cpu: '#9cb68f', memory: '#b3c5ff', temperature: '#f59e0b', network: '#d0bcff' };
+
 const ChartsContainer = styled.div`
-  padding: 20px;
+  padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
 `;
 
 const PageTitle = styled.h1`
   color: ${props => props.theme.colors.text};
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  font-weight: 300;
+  margin-bottom: 24px;
+  font-size: 2.2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 `;
 
 const ChartsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
   gap: 20px;
   margin-bottom: 20px;
 `;
@@ -35,390 +46,228 @@ const ChartsGrid = styled.div`
 const ChartCard = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 12px;
+  border-radius: 28px;
   padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 `;
 
 const ChartTitle = styled.h3`
   color: ${props => props.theme.colors.text};
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  font-weight: 500;
+  margin-bottom: 18px;
+  font-size: 1.15rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  &::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: ${props => props.dotcolor || props.theme.colors.primary};
+    box-shadow: 0 0 10px ${props => props.dotcolor || props.theme.colors.primary};
+  }
 `;
 
 const ChartWrapper = styled.div`
   width: 100%;
   height: 300px;
-  
   .recharts-cartesian-grid-horizontal line,
-  .recharts-cartesian-grid-vertical line {
-    stroke: ${props => props.theme.colors.border};
-  }
-  
-  .recharts-text {
-    fill: ${props => props.theme.colors.textSecondary};
-    font-size: 12px;
-  }
-  
-  .recharts-tooltip-wrapper {
-    .recharts-default-tooltip {
-      background-color: ${props => props.theme.colors.surface} !important;
-      border: 1px solid ${props => props.theme.colors.border} !important;
-      border-radius: 0.5rem !important;
-      color: ${props => props.theme.colors.text} !important;
-    }
-  }
+  .recharts-cartesian-grid-vertical line { stroke: ${props => props.theme.colors.border}; }
+  .recharts-text { fill: ${props => props.theme.colors.textSecondary}; font-size: 12px; }
 `;
 
 const MetricsSummary = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 28px;
 `;
 
 const MetricCard = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: 24px;
+  padding: 20px;
   text-align: center;
 `;
 
 const MetricValue = styled.div`
   font-size: 2rem;
-  font-weight: bold;
+  font-weight: 700;
   color: ${props => props.color || props.theme.colors.primary};
-  margin-bottom: 5px;
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
 `;
 
 const MetricLabel = styled.div`
   color: ${props => props.theme.colors.textSecondary};
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
 `;
 
 const TimeRangeSelector = styled.div`
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
+  span { color: ${props => props.theme.colors.textSecondary}; margin-right: 4px; }
 `;
 
 const TimeButton = styled.button`
-  background: ${props => props.active ? props.theme.colors.primary : props.theme.colors.surface};
-  color: ${props => props.active ? 'white' : props.theme.colors.text};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 6px;
-  padding: 8px 16px;
+  background: ${props => props.active ? props.theme.colors.primary : 'transparent'};
+  color: ${props => props.active ? '#00316e' : props.theme.colors.text};
+  border: 1px solid ${props => props.active ? props.theme.colors.primary : props.theme.colors.border};
+  border-radius: 9999px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: ${props => props.theme.colors.primary};
-    color: white;
-  }
+  transition: all 0.25s cubic-bezier(.2,0,0,1);
+  &:hover { background: ${props => props.active ? props.theme.colors.primary : 'rgba(179,197,255,0.12)'}; }
 `;
 
-const Charts = ({ metrics = {}, isConnected = false }) => {
+const Charts = ({ isConnected = false }) => {
   const [timeRange, setTimeRange] = useState('1h');
   const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
-    // Only fetch data if connected
-    if (!isConnected) {
-      setChartData([]);
-      return;
-    }
+    if (!isConnected) { setChartData([]); return; }
 
-    // Fetch historical chart data from database
+    const labelFor = (utc, range) => {
+      const o = { timeZone: 'Europe/Berlin' };
+      if (range === '7d') return utc.toLocaleDateString('de-DE', { ...o, day: '2-digit', month: '2-digit' });
+      if (range === '24h') return utc.toLocaleString('de-DE', { ...o, weekday: 'short', hour: '2-digit', minute: '2-digit' });
+      return utc.toLocaleTimeString('de-DE', { ...o, hour: '2-digit', minute: '2-digit' });
+    };
+
     const fetchChartData = async () => {
       try {
-        const data = await apiRequest(`/api/metrics/charts?range=${timeRange}&limit=50`);
-        
-        // Convert database data to Recharts format
-        const chartPoints = [];
-        const maxLength = Math.max(
-          data.data.cpu?.length || 0,
-          data.data.memory?.length || 0,
-          data.data.temperature?.length || 0,
-          data.data.network?.length || 0
-        );
-        
+        const data = await apiRequest(`/api/metrics/charts?range=${timeRange}`);
+        const d = data.data || {};
+        const maxLength = Math.max(d.cpu?.length || 0, d.memory?.length || 0, d.temperature?.length || 0, d.network?.length || 0);
+
+        const pts = [];
         for (let i = 0; i < maxLength; i++) {
-          const cpuPoint = data.data.cpu?.[i];
-          const memoryPoint = data.data.memory?.[i];
-          const tempPoint = data.data.temperature?.[i];
-          const networkPoint = data.data.network?.[i];
-          
-          // Use the first available timestamp
-          const timestamp = cpuPoint?.timestamp || memoryPoint?.timestamp || tempPoint?.timestamp || networkPoint?.timestamp;
-          
-          if (timestamp) {
-            // Ensure timestamp is properly parsed as UTC and converted to local time
-            const utcTime = new Date(timestamp);
-            const localTimeString = utcTime.toLocaleTimeString('de-DE', { 
-              hour: '2-digit', 
-              minute: '2-digit',
-              timeZone: 'Europe/Berlin'
-            });
-            
-            chartPoints.push({
-              timestamp: localTimeString,
-              fullTimestamp: timestamp,
-              cpu: cpuPoint?.value || null,
-              memory: memoryPoint?.value || null,
-              temperature: tempPoint?.value || null,
-              network: networkPoint?.value || null
-            });
-          }
+          const ts = d.cpu?.[i]?.timestamp || d.memory?.[i]?.timestamp || d.temperature?.[i]?.timestamp || d.network?.[i]?.timestamp;
+          if (!ts) continue;
+          pts.push({
+            fullTimestamp: ts,
+            t: new Date(ts).getTime(),
+            cpu: d.cpu?.[i]?.value ?? null,
+            memory: d.memory?.[i]?.value ?? null,
+            temperature: d.temperature?.[i]?.value ?? null,
+            netRaw: d.network?.[i]?.value ?? null,   // cumulative bytes_recv
+          });
         }
-        
-        // Sort by timestamp and take most recent points
-        chartPoints.sort((a, b) => new Date(a.fullTimestamp) - new Date(b.fullTimestamp));
-        
-        setChartData(chartPoints);
-      } catch (error) {
-        console.error('Failed to fetch historical chart data:', error);
+        pts.sort((a, b) => a.t - b.t);
+
+        // derive network RATE (B/s) from the cumulative counter deltas
+        for (let i = 0; i < pts.length; i++) {
+          if (i === 0 || pts[i].netRaw === null || pts[i - 1].netRaw === null) { pts[i].network = null; }
+          else {
+            const dBytes = pts[i].netRaw - pts[i - 1].netRaw;
+            const dSec = (pts[i].t - pts[i - 1].t) / 1000;
+            pts[i].network = (dBytes >= 0 && dSec > 0) ? dBytes / dSec : null; // negative = counter reset
+          }
+          pts[i].timestamp = labelFor(new Date(pts[i].fullTimestamp), timeRange);
+        }
+        setChartData(pts);
+      } catch (e) {
+        console.error('Failed to fetch chart data:', e);
         setChartData([]);
       }
     };
 
-    // Initial fetch
     fetchChartData();
-    
-    // Refresh data every 5 seconds for historical data
-    const interval = setInterval(fetchChartData, 5000);
-    
-    return () => clearInterval(interval);
+    const iv = setInterval(fetchChartData, 5000);
+    return () => clearInterval(iv);
   }, [timeRange, isConnected]);
 
-  // Custom tooltip formatter
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{
-          backgroundColor: '#343845',
-          border: '1px solid #4a5568',
-          borderRadius: '0.5rem',
-          padding: '12px',
-          color: '#d1d5db'
-        }}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>{`Zeit: ${label}`}</p>
-          {payload.map((entry, index) => (
-            <p key={index} style={{ margin: '4px 0', color: entry.color }}>
-              {`${entry.name}: ${entry.value !== null ? entry.value.toFixed(1) : '--'}${getUnit(entry.dataKey)}`}
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
+  const fmtVal = (key, v) => {
+    if (v === null || v === undefined) return '--';
+    if (key === 'network') return humanRate(v);
+    if (key === 'temperature') return `${v.toFixed(1)} °C`;
+    return `${v.toFixed(1)} %`;
   };
 
-  const getUnit = (dataKey) => {
-    const units = {
-      cpu: '%',
-      memory: '%',
-      temperature: '°C',
-      network: ' KB/s'
-    };
-    return units[dataKey] || '';
+  const CustomTooltip = ({ active, payload }) => {
+    if (!active || !payload || !payload.length) return null;
+    const full = payload[0]?.payload?.fullTimestamp;
+    const when = full ? new Date(full).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : '';
+    return (
+      <div style={{ background: '#1c1d23', border: '1px solid #44464f', borderRadius: 16, padding: 12, color: '#e4e2e9' }}>
+        <p style={{ margin: '0 0 8px 0', fontWeight: 700, fontSize: 12 }}>{when}</p>
+        {payload.map((e, i) => (
+          <p key={i} style={{ margin: '4px 0', color: e.color }}>{`${e.name}: ${fmtVal(e.dataKey, e.value)}`}</p>
+        ))}
+      </div>
+    );
   };
 
-  const getCurrentMetrics = () => {
-    if (!isConnected || chartData.length === 0) {
-      return { cpu: '--', memory: '--', temperature: '--', network: '--' };
-    }
-    
-    const lastPoint = chartData[chartData.length - 1];
-    
-    return {
-      cpu: lastPoint.cpu !== null ? lastPoint.cpu.toFixed(1) : '--',
-      memory: lastPoint.memory !== null ? lastPoint.memory.toFixed(1) : '--',
-      temperature: lastPoint.temperature !== null ? lastPoint.temperature.toFixed(1) : '--',
-      network: lastPoint.network !== null ? lastPoint.network.toFixed(0) : '--'
-    };
+  const last = chartData[chartData.length - 1] || {};
+  const cur = {
+    cpu: last.cpu != null ? last.cpu.toFixed(1) : '--',
+    memory: last.memory != null ? last.memory.toFixed(1) : '--',
+    temperature: last.temperature != null ? last.temperature.toFixed(1) : '--',
+    network: humanRate(last.network),
   };
-
-  const currentMetrics = getCurrentMetrics();
 
   if (!isConnected) {
     return (
       <ChartsContainer>
         <PageTitle>System Charts</PageTitle>
-        <div style={{ 
-          textAlign: 'center', 
-          color: '#e16162', 
-          marginTop: '40px',
-          padding: '40px',
-          background: 'rgba(225, 97, 98, 0.1)',
-          borderRadius: '1rem',
-          border: '1px solid rgba(225, 97, 98, 0.2)'
-        }}>
-          <h3 style={{ marginBottom: '16px', color: '#e16162' }}>⚠️ Nicht verbunden</h3>
+        <div style={{ textAlign: 'center', color: '#e16162', marginTop: 40, padding: 40, background: 'rgba(225,97,98,0.1)', borderRadius: 28, border: '1px solid rgba(225,97,98,0.2)' }}>
+          <h3 style={{ marginBottom: 16, color: '#e16162' }}>⚠️ Nicht verbunden</h3>
           <p style={{ color: '#9ca3af' }}>Keine Diagrammdaten verfügbar</p>
         </div>
       </ChartsContainer>
     );
   }
 
+  const charts = [
+    { key: 'cpu', title: 'CPU Usage', domain: [0, 100], yfmt: (v) => `${v}%` },
+    { key: 'memory', title: 'Memory Usage', domain: [0, 100], yfmt: (v) => `${v}%` },
+    { key: 'temperature', title: 'Temperature', domain: ['dataMin - 5', 'dataMax + 5'], yfmt: (v) => `${v}°` },
+    { key: 'network', title: 'Network I/O (Empfang)', domain: [0, 'auto'], yfmt: humanRate },
+  ];
+
   return (
     <ChartsContainer>
       <PageTitle>System Charts</PageTitle>
-      
+
       <TimeRangeSelector>
-        <span>Zeitbereich: </span>
+        <span>Zeitbereich:</span>
         {['1h', '6h', '24h', '7d'].map(range => (
-          <TimeButton
-            key={range}
-            active={timeRange === range}
-            onClick={() => setTimeRange(range)}
-          >
-            {range}
-          </TimeButton>
+          <TimeButton key={range} active={timeRange === range} onClick={() => setTimeRange(range)}>{range}</TimeButton>
         ))}
       </TimeRangeSelector>
 
       <MetricsSummary>
-        <MetricCard>
-          <MetricValue color="#9cb68f">{currentMetrics.cpu}%</MetricValue>
-          <MetricLabel>CPU Usage</MetricLabel>
-        </MetricCard>
-        <MetricCard>
-          <MetricValue color="#688db1">{currentMetrics.memory}%</MetricValue>
-          <MetricLabel>Memory Usage</MetricLabel>
-        </MetricCard>
-        <MetricCard>
-          <MetricValue color="#f59e0b">{currentMetrics.temperature}°C</MetricValue>
-          <MetricLabel>Temperature</MetricLabel>
-        </MetricCard>
-        <MetricCard>
-          <MetricValue color="#a78bfa">{currentMetrics.network} KB/s</MetricValue>
-          <MetricLabel>Network I/O</MetricLabel>
-        </MetricCard>
+        <MetricCard><MetricValue color={ACCENT.cpu}>{cur.cpu}%</MetricValue><MetricLabel>CPU Usage</MetricLabel></MetricCard>
+        <MetricCard><MetricValue color={ACCENT.memory}>{cur.memory}%</MetricValue><MetricLabel>Memory Usage</MetricLabel></MetricCard>
+        <MetricCard><MetricValue color={ACCENT.temperature}>{cur.temperature}°C</MetricValue><MetricLabel>Temperature</MetricLabel></MetricCard>
+        <MetricCard><MetricValue color={ACCENT.network}>{cur.network}</MetricValue><MetricLabel>Network I/O</MetricLabel></MetricCard>
       </MetricsSummary>
 
       <ChartsGrid>
-        <ChartCard>
-          <ChartTitle>CPU Usage</ChartTitle>
-          <ChartWrapper>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="timestamp" 
-                  tick={{ fontSize: 11 }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis 
-                  tick={{ fontSize: 11 }}
-                  domain={[0, 100]}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="cpu" 
-                  stroke="#9cb68f" 
-                  strokeWidth={2}
-                  dot={false}
-                  name="CPU"
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </ChartCard>
-        
-        <ChartCard>
-          <ChartTitle>Memory Usage</ChartTitle>
-          <ChartWrapper>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="timestamp" 
-                  tick={{ fontSize: 11 }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis 
-                  tick={{ fontSize: 11 }}
-                  domain={[0, 100]}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="memory" 
-                  stroke="#688db1" 
-                  strokeWidth={2}
-                  dot={false}
-                  name="Memory"
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </ChartCard>
-        
-        <ChartCard>
-          <ChartTitle>Temperature</ChartTitle>
-          <ChartWrapper>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="timestamp" 
-                  tick={{ fontSize: 11 }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis 
-                  tick={{ fontSize: 11 }}
-                  domain={['dataMin - 5', 'dataMax + 5']}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="temperature" 
-                  stroke="#f59e0b" 
-                  strokeWidth={2}
-                  dot={false}
-                  name="Temperature"
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </ChartCard>
-        
-        <ChartCard>
-          <ChartTitle>Network I/O</ChartTitle>
-          <ChartWrapper>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="timestamp" 
-                  tick={{ fontSize: 11 }}
-                  interval="preserveStartEnd"
-                />
-                <YAxis 
-                  tick={{ fontSize: 11 }}
-                  domain={[0, 'dataMax + 100']}
-                />
-                <Tooltip content={<CustomTooltip />} />
-                <Line 
-                  type="monotone" 
-                  dataKey="network" 
-                  stroke="#a78bfa" 
-                  strokeWidth={2}
-                  dot={false}
-                  name="Network"
-                  connectNulls={false}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </ChartWrapper>
-        </ChartCard>
+        {charts.map(c => (
+          <ChartCard key={c.key}>
+            <ChartTitle dotcolor={ACCENT[c.key]}>{c.title}</ChartTitle>
+            <ChartWrapper>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 5, right: 16, left: 4, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="timestamp" tick={{ fontSize: 11 }} interval="preserveStartEnd" minTickGap={40} />
+                  <YAxis tick={{ fontSize: 11 }} domain={c.domain} width={c.key === 'network' ? 64 : 40} tickFormatter={c.yfmt} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Line type="monotone" dataKey={c.key} stroke={ACCENT[c.key]} strokeWidth={2.5} dot={false} name={c.title} connectNulls={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </ChartWrapper>
+          </ChartCard>
+        ))}
       </ChartsGrid>
     </ChartsContainer>
   );
