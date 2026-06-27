@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
@@ -27,17 +27,17 @@ const MetricsGrid = styled.div`
   }
 `;
 
-const MetricCard = styled.div`
+const MetricCard = styled.div.attrs({ 'data-tilt': true })`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   padding: 1.5rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 160ms var(--md-emphasized, ease), box-shadow 0.3s ease;
+  transform-style: preserve-3d;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.25), 0 4px 6px -2px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 14px 22px -6px rgba(0, 0, 0, 0.4), 0 4px 8px -2px rgba(0, 0, 0, 0.2);
   }
 `;
 
@@ -191,7 +191,24 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
   const gpu = currentMetrics.gpu?.[0] || {};
   const processes = currentMetrics.processes?.[0] || {};
   const network = currentMetrics.network?.[0] || {};
-  
+
+  // Cursor-reactive tilt — a few degrees toward the pointer, damped by the card's
+  // own transform transition. Gated to real pointers (playbook: touch pays nothing).
+  const lastTilt = useRef(null);
+  const canTilt = useRef(typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  const onTilt = (e) => {
+    if (!canTilt.current) return;
+    const card = e.target.closest('[data-tilt]');
+    if (lastTilt.current && lastTilt.current !== card) { lastTilt.current.style.transform = ''; lastTilt.current = null; }
+    if (!card) return;
+    const r = card.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - 0.5;
+    const py = (e.clientY - r.top) / r.height - 0.5;
+    card.style.transform = `perspective(820px) rotateX(${(-py * 4).toFixed(2)}deg) rotateY(${(px * 4).toFixed(2)}deg) translateY(-4px)`;
+    lastTilt.current = card;
+  };
+  const offTilt = () => { if (lastTilt.current) { lastTilt.current.style.transform = ''; lastTilt.current = null; } };
+
   if (loading && Object.keys(currentMetrics).length === 0) {
     return (
       <DashboardContainer>
@@ -212,7 +229,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {isConnected ? 'Connected' : 'Disconnected'} • Last updated: {currentTime.toLocaleTimeString()}
       </ConnectionStatus>
 
-      <MetricsGrid>
+      <MetricsGrid className="md-stagger" onMouseMove={onTilt} onMouseLeave={offTilt}>
         {/* CPU Temperature */}
         <TemperatureCard temperature={cpu.cpu_temp_celsius || 0}>
           <MetricTitle>

@@ -244,14 +244,14 @@ const Charts = ({ isConnected = false }) => {
         ))}
       </TimeRangeSelector>
 
-      <MetricsSummary>
+      <MetricsSummary className="md-stagger">
         <MetricCard><MetricValue color={ACCENT.cpu}>{cur.cpu}%</MetricValue><MetricLabel>CPU Usage</MetricLabel></MetricCard>
         <MetricCard><MetricValue color={ACCENT.memory}>{cur.memory}%</MetricValue><MetricLabel>Memory Usage</MetricLabel></MetricCard>
         <MetricCard><MetricValue color={ACCENT.temperature}>{cur.temperature}°C</MetricValue><MetricLabel>Temperature</MetricLabel></MetricCard>
         <MetricCard><MetricValue color={ACCENT.network}>{cur.network}</MetricValue><MetricLabel>Network I/O</MetricLabel></MetricCard>
       </MetricsSummary>
 
-      <ChartsGrid>
+      <ChartsGrid className="md-stagger">
         {charts.map(c => (
           <ChartCard key={c.key}>
             <ChartTitle dotcolor={ACCENT[c.key]}>{c.title}</ChartTitle>

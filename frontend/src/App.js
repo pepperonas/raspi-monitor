@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
 import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
@@ -73,6 +73,31 @@ const GlobalStyle = createGlobalStyle`
   @media (prefers-reduced-motion: reduce){
     *,*::before,*::after{ animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
   }
+
+  /* ===== MD3 Expressive Motion — "live control room" (2026-06-27) ===== */
+  /* One timing system: emphasized easing + a gentle spring, reused everywhere. */
+  :root{
+    --md-decelerate: cubic-bezier(0.05,0.7,0.1,1);   /* entrances */
+    --md-emphasized: cubic-bezier(0.2,0,0,1);
+    --md-spring: cubic-bezier(0.34,1.42,0.5,1);       /* spatial overshoot */
+    --md-fast:180ms; --md-med:360ms; --md-slow:520ms;
+  }
+  /* Core transition: a view slides up as you move between consoles. */
+  @keyframes md-page-in{ from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;} }
+  .md-page{ animation: md-page-in var(--md-med) var(--md-decelerate) backwards; }
+  /* Signature catch: instruments power on, staggered, with a spring overshoot. */
+  @keyframes md-panel-rise{ 0%{opacity:0; transform:translateY(20px) scale(.98);} 100%{opacity:1; transform:none;} }
+  .md-stagger > *{ animation: md-panel-rise var(--md-slow) var(--md-spring) backwards; }
+  .md-stagger > *:nth-child(1){animation-delay:.03s} .md-stagger > *:nth-child(2){animation-delay:.07s}
+  .md-stagger > *:nth-child(3){animation-delay:.11s} .md-stagger > *:nth-child(4){animation-delay:.15s}
+  .md-stagger > *:nth-child(5){animation-delay:.19s} .md-stagger > *:nth-child(6){animation-delay:.23s}
+  .md-stagger > *:nth-child(7){animation-delay:.27s} .md-stagger > *:nth-child(8){animation-delay:.31s}
+  .md-stagger > *:nth-child(9){animation-delay:.35s} .md-stagger > *:nth-child(n+10){animation-delay:.39s}
+  /* Vital sign: a value blooms softly in its own colour the instant it updates. */
+  @keyframes md-tick{ 0%{text-shadow:0 0 0 transparent;} 35%{text-shadow:0 0 16px currentColor;} 100%{text-shadow:0 0 0 transparent;} }
+  .md-tick{ animation: md-tick 600ms ease-out; }
+  /* Cursor-reactive cards (gated to real pointers below, in JS). */
+  .md-tiltable{ transition: transform var(--md-fast) var(--md-emphasized), box-shadow var(--md-med) var(--md-emphasized); transform-style:preserve-3d; will-change:transform; }
 `;
 
 const AppContainer = styled.div`
@@ -121,6 +146,25 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Keyed by path so the page-transition (md-page) replays on every navigation.
+function AppRoutes({ metrics, alerts, isConnected, isDarkMode, toggleTheme, wsService }) {
+  const location = useLocation();
+  return (
+    <div className="md-page" key={location.pathname}>
+      <Routes location={location}>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={<Dashboard metrics={metrics} alerts={alerts} isConnected={isConnected} />} />
+        <Route path="/metrics" element={<Metrics metrics={metrics} isConnected={isConnected} />} />
+        <Route path="/charts" element={<Charts metrics={metrics} isConnected={isConnected} />} />
+        <Route path="/alerts" element={<Alerts alerts={alerts} isConnected={isConnected} />} />
+        <Route path="/tasks" element={<Tasks isConnected={isConnected} />} />
+        <Route path="/system" element={<System isConnected={isConnected} />} />
+        <Route path="/settings" element={<Settings isDarkMode={isDarkMode} onToggleTheme={toggleTheme} wsService={wsService} />} />
+      </Routes>
+    </div>
+  );
+}
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -212,72 +256,14 @@ function App() {
                 alerts={alerts}
               />
               <ContentArea>
-                <Routes>
-                  <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <Dashboard 
-                        metrics={metrics} 
-                        alerts={alerts}
-                        isConnected={isConnected}
-                      />
-                    } 
-                  />
-                  <Route 
-                    path="/metrics" 
-                    element={
-                      <Metrics 
-                        metrics={metrics}
-                        isConnected={isConnected}
-                      />
-                    } 
-                  />
-                  <Route 
-                    path="/charts" 
-                    element={
-                      <Charts 
-                        metrics={metrics}
-                        isConnected={isConnected}
-                      />
-                    } 
-                  />
-                  <Route 
-                    path="/alerts" 
-                    element={
-                      <Alerts 
-                        alerts={alerts}
-                        isConnected={isConnected}
-                      />
-                    } 
-                  />
-                  <Route 
-                    path="/tasks" 
-                    element={
-                      <Tasks 
-                        isConnected={isConnected}
-                      />
-                    } 
-                  />
-                  <Route 
-                    path="/system" 
-                    element={
-                      <System 
-                        isConnected={isConnected}
-                      />
-                    } 
-                  />
-                  <Route 
-                    path="/settings" 
-                    element={
-                      <Settings 
-                        isDarkMode={isDarkMode}
-                        onToggleTheme={toggleTheme}
-                        wsService={wsService}
-                      />
-                    } 
-                  />
-                </Routes>
+                <AppRoutes
+                  metrics={metrics}
+                  alerts={alerts}
+                  isConnected={isConnected}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
+                  wsService={wsService}
+                />
               </ContentArea>
               <Footer>
                 Made with ❤️ by Martin Pfeffer
