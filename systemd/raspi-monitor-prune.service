@@ -1,0 +1,5 @@
+[Unit]
+Description=Prune raspi_monitor metrics to 30 days
+[Service]
+Type=oneshot
+ExecStart=/home/pi/apps/raspi-monitor/prune-metrics.sh
