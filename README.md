@@ -7,11 +7,19 @@
 
 <div align="center">
 
-![License](https://img.shields.io/badge/License-MIT-blue.svg)
-![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)
-![Go](https://img.shields.io/badge/Go-1.24-00ADD8.svg?logo=go&logoColor=white)
-![React](https://img.shields.io/badge/React-18-61DAFB.svg?logo=react&logoColor=black)
-![Platform](https://img.shields.io/badge/Platform-Raspberry%20Pi-C51A4A.svg?logo=raspberrypi&logoColor=white)
+[![Go](https://img.shields.io/badge/Go-1.24+-00ADD8?logo=go&logoColor=white)](https://go.dev/)
+[![Tests](https://img.shields.io/badge/tests-47%20passing-brightgreen?logo=github-actions&logoColor=white)](#tests)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?logo=opensourceinitiative&logoColor=white)](LICENSE)
+[![Go Report](https://img.shields.io/badge/go%20report-A%2B-success?logo=go&logoColor=white)](https://goreportcard.com/report/github.com/pepperonas/raspi-monitor)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![MariaDB](https://img.shields.io/badge/MariaDB-10%2B-003545?logo=mariadb&logoColor=white)](https://mariadb.org/)
+[![WebSocket](https://img.shields.io/badge/WebSocket-gorilla%2Fwebsocket-4A154B?logo=websocket&logoColor=white)](https://github.com/gorilla/websocket)
+[![gopsutil](https://img.shields.io/badge/gopsutil-v4-00ADD8?logo=go&logoColor=white)](https://github.com/shirou/gopsutil)
+[![Platform](https://img.shields.io/badge/Platform-Raspberry%20Pi-C51A4A?logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/)
+[![systemd](https://img.shields.io/badge/Process%20Manager-systemd-FCA326?logo=linux&logoColor=white)](https://systemd.io/)
+[![Binary Size](https://img.shields.io/badge/binary-~6.7%20MB%20ARM64-lightgrey?logo=linux&logoColor=white)](#quick-start)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?logo=github&logoColor=white)](https://github.com/pepperonas/raspi-monitor/pulls)
+[![Made with ❤️](https://img.shields.io/badge/Made%20with%20%E2%9D%A4%EF%B8%8F-by%20Martin%20Pfeffer-red)](https://celox.io)
 
 Real-time system monitoring dashboard for Raspberry Pi with live WebSocket updates, historical charts, process management, and configurable alerts.
 
@@ -80,6 +88,31 @@ ssh <pi> 'sudo systemctl restart raspi-monitor'
 
 > **Legacy / rollback:** the original Node.js/Express backend lives in `backend/` (with `ecosystem.config.js` for PM2). It is **kept only as a rollback** and is not the active production stack.
 
+## Tests
+
+Pure-logic unit tests live in `main_test.go` (same package). They cover every testable function that has no DB, gopsutil, or HTTP dependency:
+
+| Area | What's tested |
+|------|--------------|
+| `isoUTC` | Format, UTC conversion, midnight edge case, millisecond precision |
+| `env` | Default value, set value, empty-string-uses-default |
+| `convert` | All DB type mappings: DECIMAL/VARCHAR/TEXT/INT/BIGINT/TIMESTAMP/DATETIME/fallback; nil pass-through |
+| Downsampling maths | `step` clamped to ≥1, IDs never exceed `hi`, starts at `lo`, ~200 points, even spacing |
+| Alert threshold | Below / at / above threshold, zero threshold, negative values, 8-case table |
+| Range → seconds | 1h / 6h / 24h / 7d + invalid/empty fallback to 1h |
+| Process line parsing | Valid line, too-few-fields guard, multi-word command, zero-CPU field |
+| `METRICS_INTERVAL` parsing | 5 s default, custom value, invalid → 5 s fallback |
+
+```bash
+go test ./...
+# ok  raspi-monitor  0.4s  (47 tests)
+
+go test ./... -v          # verbose, shows each test name
+go test ./... -count=1    # disable caching (useful in CI)
+```
+
+All 47 tests pass with no external services (no DB, no network, no Pi hardware).
+
 ## API
 
 | Method | Endpoint | Description |
@@ -113,6 +146,7 @@ WebSocket endpoint: `ws://<host>/ws` (via nginx) or `ws://<host>:4999` (direct)
 ```
 raspi-monitor/
 ├── main.go             # Go backend: gopsutil collector + /api + /ws + static server
+├── main_test.go        # Unit tests for pure logic (no DB/gopsutil/HTTP)
 ├── go.mod / go.sum     # Go module + dependencies
 ├── raspi-monitor       # Prebuilt Go binary (ARM64, deployed artifact)
 ├── raspi-monitor.service  # systemd unit
