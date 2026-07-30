@@ -18,9 +18,9 @@ const PageTitle = styled.h1`
 const ProcessesSection = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 1rem;
+  border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 `;
 
 const ProcessTable = styled.table`
@@ -214,16 +214,18 @@ const Tasks = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Format memory size
+  // Format memory size (null-safe — the backend can omit fields for some processes)
   const formatMemory = (mb) => {
+    mb = mb ?? 0;
     if (mb > 1024) {
       return `${(mb / 1024).toFixed(1)}GB`;
     }
     return `${mb.toFixed(0)}MB`;
   };
 
-  // Format network value
+  // Format network value (null-safe)
   const formatNetwork = (value) => {
+    value = value ?? 0;
     if (value > 1024) {
       return `${(value / 1024).toFixed(1)}MB/s`;
     }
@@ -232,8 +234,8 @@ const Tasks = () => {
 
   // Calculate stats
   const totalProcesses = processes.length;
-  const avgCpu = processes.length > 0 ? (processes.reduce((sum, p) => sum + p.cpu, 0) / processes.length).toFixed(1) : 0;
-  const avgMemory = processes.length > 0 ? (processes.reduce((sum, p) => sum + p.memory, 0) / processes.length).toFixed(1) : 0;
+  const avgCpu = processes.length > 0 ? (processes.reduce((sum, p) => sum + (p.cpu ?? 0), 0) / processes.length).toFixed(1) : 0;
+  const avgMemory = processes.length > 0 ? (processes.reduce((sum, p) => sum + (p.memory ?? 0), 0) / processes.length).toFixed(1) : 0;
   const highCpuProcesses = processes.filter(p => p.cpu > 5).length;
 
   return (
@@ -345,19 +347,19 @@ const Tasks = () => {
                 </TableCell>
                 <TableCell>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ProgressBar value={process.cpu} />
-                    <span>{process.cpu.toFixed(1)}%</span>
+                    <ProgressBar value={process.cpu ?? 0} />
+                    <span>{(process.cpu ?? 0).toFixed(1)}%</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ProgressBar value={process.memory} />
-                    <span>{process.memory.toFixed(1)}%</span>
+                    <ProgressBar value={process.memory ?? 0} />
+                    <span>{(process.memory ?? 0).toFixed(1)}%</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ProgressBar value={process.network} />
+                    <ProgressBar value={process.network ?? 0} />
                     <span>{formatNetwork(process.network)}</span>
                   </div>
                 </TableCell>

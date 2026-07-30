@@ -18,10 +18,10 @@ const PageTitle = styled.h1`
 const ChartContainer = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 1rem;
+  border-radius: 20px;
   padding: 24px;
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 `;
 
 const ChartTitle = styled.h3`
@@ -35,18 +35,29 @@ const TemperatureChart = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
-  padding: 20px;
-  background: linear-gradient(135deg, #9cb68f 0%, #84a373 100%);
-  border-radius: 0.5rem;
-  color: white;
-  
+  padding: 22px 24px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px;
+  color: #fff;
+
+  /* Refined tonal temp-reactive containers (match the Dashboard hero cards). */
   ${props => {
     const temp = props.temperature;
-    if (temp > 70) return 'background: linear-gradient(135deg, #e16162 0%, #dc2626 100%);';
-    if (temp > 60) return 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);';
-    if (temp > 50) return 'background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);';
-    return 'background: linear-gradient(135deg, #9cb68f 0%, #84a373 100%);';
+    if (temp > 70) return 'background: linear-gradient(135deg, #a83236 0%, #6d1c20 100%);';
+    if (temp > 60) return 'background: linear-gradient(135deg, #bd7a2c 0%, #8a531a 100%);';
+    if (temp > 50) return 'background: linear-gradient(135deg, #b0863d 0%, #7e5d24 100%);';
+    return 'background: linear-gradient(135deg, #4a6a58 0%, #324f3e 100%);';
   }}
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(110% 140% at 92% 0%, rgba(255, 255, 255, 0.22), transparent 55%);
+    pointer-events: none;
+  }
+  & > * { position: relative; }
 `;
 
 const TemperatureValue = styled.div`

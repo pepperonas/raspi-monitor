@@ -9,10 +9,17 @@ const DashboardContainer = styled.div`
 `;
 
 const PageTitle = styled.h1`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  font-weight: 300;
+  margin-bottom: 8px;
+  font-size: 2.7rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  /* MD3 Expressive: display heading with a tonal gradient sweep into primary. */
+  background: linear-gradient(100deg, ${props => props.theme.colors.text} 32%, ${props => props.theme.colors.primary});
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  width: fit-content;
 `;
 
 const MetricsGrid = styled.div`
@@ -28,16 +35,20 @@ const MetricsGrid = styled.div`
 `;
 
 const MetricCard = styled.div.attrs({ 'data-tilt': true })`
-  background: ${props => props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
-  transition: transform 160ms var(--md-emphasized, ease), box-shadow 0.3s ease;
+  position: relative;
+  /* MD3 tonal elevation: card sits one surface tier above the background, soft
+     diffuse shadow + a hairline top highlight instead of a hard 1px border. */
+  background: ${props => props.theme.colors.surfaceElevated || props.theme.colors.surface};
+  border: 1px solid ${props => props.theme.colors.borderLight};
+  border-radius: 24px;
+  padding: 1.6rem;
+  box-shadow: ${props => props.theme.shadows.md}, inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  transition: transform 220ms var(--md-spring, ease), box-shadow 260ms var(--md-emphasized, ease), border-color 260ms ease;
   transform-style: preserve-3d;
 
   &:hover {
-    box-shadow: 0 14px 22px -6px rgba(0, 0, 0, 0.4), 0 4px 8px -2px rgba(0, 0, 0, 0.2);
+    border-color: ${props => props.theme.colors.border};
+    box-shadow: ${props => props.theme.shadows.lg}, inset 0 1px 0 rgba(255, 255, 255, 0.07);
   }
 `;
 
@@ -52,10 +63,13 @@ const MetricTitle = styled.h3`
 `;
 
 const MetricValue = styled.div`
-  font-size: 2.5rem;
+  font-size: 2.6rem;
   font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.05;
   color: ${props => props.color || props.theme.colors.primary};
   margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;   /* live digits don't jitter */
 `;
 
 const MetricUnit = styled.span`
@@ -94,26 +108,29 @@ const ConnectionStatus = styled.div`
 `;
 
 const TemperatureCard = styled(MetricCard)`
+  border: none;
+  overflow: hidden;
+  /* Richer, tonal temp-reactive containers (MD3 container colours, not neon). */
   background: ${props => {
     const temp = props.temperature;
-    if (temp > 70) return 'linear-gradient(135deg, #e16162 0%, #dc2626 100%)';
-    if (temp > 60) return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-    if (temp > 50) return 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-    return 'linear-gradient(135deg, #9cb68f 0%, #84a373 100%)';
+    if (temp > 70) return 'linear-gradient(135deg, #a83236 0%, #6d1c20 100%)';
+    if (temp > 60) return 'linear-gradient(135deg, #bd7a2c 0%, #8a531a 100%)';
+    if (temp > 50) return 'linear-gradient(135deg, #b0863d 0%, #7e5d24 100%)';
+    return 'linear-gradient(135deg, #4a6a58 0%, #324f3e 100%)';
   }};
-  color: white;
-  
-  ${MetricTitle} {
-    color: white;
+  color: #fff;
+
+  /* Soft radial highlight in the top-right = expressive "lit" hero surface. */
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(120% 92% at 86% 4%, rgba(255, 255, 255, 0.24), transparent 56%);
+    pointer-events: none;
   }
-  
-  ${MetricValue} {
-    color: white;
-  }
-  
-  ${MetricSubtext} {
-    color: rgba(255, 255, 255, 0.8);
-  }
+
+  ${MetricTitle}, ${MetricValue} { color: #fff; position: relative; }
+  ${MetricSubtext} { color: rgba(255, 255, 255, 0.84); position: relative; }
 `;
 
 const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {

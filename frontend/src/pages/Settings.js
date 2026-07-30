@@ -17,7 +17,7 @@ const PageTitle = styled.h1`
 const SettingsGroup = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

@@ -49,19 +49,21 @@ export const lightTheme = {
     xxl: '48px',
   },
   
+  // MD3 Expressive shape scale — larger, rounder corners than stock.
   borderRadius: {
-    sm: '4px',
-    md: '8px',
-    lg: '12px',
-    xl: '16px',
+    sm: '8px',
+    md: '14px',
+    lg: '20px',
+    xl: '28px',
     full: '9999px',
   },
-  
+
+  // MD3 tonal elevation — soft, diffuse shadows (not hard drop shadows).
   shadows: {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+    sm: '0 1px 3px rgba(0, 0, 0, 0.20)',
+    md: '0 6px 16px rgba(0, 0, 0, 0.28)',
+    lg: '0 14px 32px rgba(0, 0, 0, 0.34)',
+    xl: '0 22px 48px rgba(0, 0, 0, 0.42)',
   },
   
   typography: {
@@ -108,11 +110,15 @@ export const darkTheme = {
     error: '#e16162',
     info: '#688db1',
     
-    // MD3 Expressive tonal dark surfaces
+    // MD3 Expressive tonal dark surfaces (rising elevation tiers)
     background: '#121318',
     backgroundDarker: '#0d0e12',
     surface: '#1c1d23',
+    surfaceElevated: '#22232b',   // cards sit one tonal step above the background
+    surfaceHigh: '#2a2b34',       // hover / raised state
     card: '#1c1d23',
+    primaryContainer: '#3a4a6b',  // tonal container for accents
+    onPrimaryContainer: '#dbe3ff',
 
     // MD3 on-surface text
     text: '#e4e2e9',

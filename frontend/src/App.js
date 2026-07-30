@@ -36,9 +36,14 @@ const GlobalStyle = createGlobalStyle`
       sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* MD3 Expressive: tonal radial wash instead of a flat fill — subtle depth. */
     background-color: ${props => props.theme.colors.background};
+    background-image:
+      radial-gradient(1100px 620px at 78% -8%, ${props => props.theme.colors.primary}14, transparent 60%),
+      radial-gradient(900px 560px at 0% 108%, ${props => props.theme.colors.secondary}10, transparent 55%);
+    background-attachment: fixed;
     color: ${props => props.theme.colors.text};
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   code {

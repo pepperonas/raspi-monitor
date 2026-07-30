@@ -18,9 +18,9 @@ const PageTitle = styled.h1`
 const SystemInfo = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 1rem;
+  border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 `;
 
 const InfoItem = styled.div`
@@ -47,10 +47,10 @@ const InfoValue = styled.div`
 const LEDSection = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 1rem;
+  border-radius: 20px;
   padding: 24px;
   margin-top: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -1px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
 `;
 
 const SectionTitle = styled.h2`
