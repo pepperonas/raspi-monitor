@@ -5,8 +5,8 @@ import styled from 'styled-components';
 const SidebarContainer = styled.nav`
   position: fixed;
   left: 0;
-  top: 0;
-  height: 100vh;
+  top: var(--sh-nav-h, 0px);                       /* sit below the shared app-switcher nav */
+  height: calc(100vh - var(--sh-nav-h, 0px));
   width: ${props => props.isOpen ? '280px' : '60px'};
   background: ${props => props.theme.colors.surface};
   border-right: 1px solid ${props => props.theme.colors.border};

@@ -97,16 +97,19 @@ const Header = ({
   isDarkMode, 
   onToggleTheme, 
   isConnected, 
-  onToggleSidebar, 
-  alerts = [] 
+  onToggleSidebar,
+  alerts = []
 }) => {
+  // Same build runs on both Pis; the Pi 5 monitor is only ever reached at its own
+  // host (192.168.178.105:4999). Everything else (nginx /app/monitor/, raspi3) = Pi 3.
+  const piModel = (typeof window !== 'undefined' && window.location.host.includes('192.168.178.105')) ? '5' : '3';
   return (
     <HeaderContainer>
       <LeftSection>
         <MenuButton onClick={onToggleSidebar}>
           ☰
         </MenuButton>
-        <Title>Raspberry Pi Monitor</Title>
+        <Title>Raspberry Pi {piModel} Monitor</Title>
       </LeftSection>
       
       <RightSection>

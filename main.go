@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -237,6 +238,107 @@ func checkAlert(typ, severity string, value, threshold float64, msg string) {
 		typ, severity, msg, value, threshold)
 }
 
+// ---- Fan status -------------------------------------------------------------
+// Reads the active-cooling fan from sysfs (Pi 5 official cooler exposes a
+// `pwmfan` hwmon with fan1_input/pwm1, plus a `pwm-fan` thermal cooling device
+// with cur_state/max_state). Devices without a fan (e.g. Pi 3) return the
+// "unavailable" shape unchanged.
+func readSysInt(p string) (int, bool) {
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return 0, false
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(string(b)))
+	if err != nil {
+		return 0, false
+	}
+	return n, true
+}
+
+func readFanStatus() map[string]any {
+	unavailable := map[string]any{"level": nil, "status": "unknown", "description": "Fan status unavailable"}
+
+	// RPM + PWM from the pwmfan hwmon (match by name so the hwmonN index can vary).
+	rpm, pwm := -1, -1
+	if names, _ := filepath.Glob("/sys/class/hwmon/hwmon*/name"); names != nil {
+		for _, nf := range names {
+			nb, err := os.ReadFile(nf)
+			if err != nil {
+				continue
+			}
+			switch strings.TrimSpace(string(nb)) {
+			case "pwmfan", "cooling_fan":
+				dir := filepath.Dir(nf)
+				if v, ok := readSysInt(filepath.Join(dir, "fan1_input")); ok {
+					rpm = v
+				}
+				if v, ok := readSysInt(filepath.Join(dir, "pwm1")); ok {
+					pwm = v
+				}
+			}
+			if rpm >= 0 {
+				break
+			}
+		}
+	}
+	if rpm < 0 { // fallback: platform cooling_fan node
+		if fs, _ := filepath.Glob("/sys/devices/platform/cooling_fan/hwmon/hwmon*/fan1_input"); len(fs) > 0 {
+			if v, ok := readSysInt(fs[0]); ok {
+				rpm = v
+			}
+		}
+	}
+
+	// Cooling level (0..max) from the pwm-fan thermal cooling device.
+	level, maxLevel := -1, -1
+	if types, _ := filepath.Glob("/sys/class/thermal/cooling_device*/type"); types != nil {
+		for _, tf := range types {
+			tb, err := os.ReadFile(tf)
+			if err != nil || strings.TrimSpace(string(tb)) != "pwm-fan" {
+				continue
+			}
+			dir := filepath.Dir(tf)
+			if v, ok := readSysInt(filepath.Join(dir, "cur_state")); ok {
+				level = v
+			}
+			if v, ok := readSysInt(filepath.Join(dir, "max_state")); ok {
+				maxLevel = v
+			}
+			break
+		}
+	}
+
+	if rpm < 0 && level < 0 {
+		return unavailable // no fan on this device (e.g. Pi 3)
+	}
+
+	on := rpm > 0 || level > 0
+	status := "off"
+	if on {
+		status = "on"
+	}
+	desc := "Active cooling"
+	if rpm >= 0 {
+		desc = fmt.Sprintf("%d RPM", rpm)
+	}
+	res := map[string]any{"status": status, "description": desc}
+	if level >= 0 {
+		res["level"] = level
+	} else {
+		res["level"] = nil
+	}
+	if maxLevel >= 0 {
+		res["max_level"] = maxLevel
+	}
+	if rpm >= 0 {
+		res["rpm"] = rpm
+	}
+	if pwm >= 0 {
+		res["pwm"] = pwm
+	}
+	return res
+}
+
 // ---- HTTP handlers ----------------------------------------------------------
 func hMetrics(w http.ResponseWriter, r *http.Request) {
 	wrap := func(m map[string]any) []any {
@@ -254,9 +356,10 @@ func hMetrics(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	gpuRow := latest("gpu_metrics")
-	if gpuRow != nil {
-		gpuRow["fan_status"] = map[string]any{"level": nil, "status": "unknown", "description": "Fan status unavailable"}
+	if gpuRow == nil {
+		gpuRow = map[string]any{}
 	}
+	gpuRow["fan_status"] = readFanStatus()
 	writeJSON(w, 200, map[string]any{
 		"cpu":       wrap(cpuRow),
 		"memory":    wrap(latest("memory_metrics")),

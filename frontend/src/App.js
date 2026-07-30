@@ -232,6 +232,20 @@ function App() {
     localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen));
   }, [sidebarOpen]);
 
+  // Offset our fixed sidebar below the shared app-switcher nav (nav.js injects
+  // #sh-appnav fixed at top:0, z-index above ours). Accessed directly on a Pi
+  // (no nginx -> no nav.js), #sh-appnav is absent and --sh-nav-h stays 0.
+  useEffect(() => {
+    const apply = () => {
+      const nav = document.getElementById('sh-appnav');
+      document.documentElement.style.setProperty('--sh-nav-h', (nav ? nav.offsetHeight : 0) + 'px');
+    };
+    apply();
+    const timers = [setTimeout(apply, 200), setTimeout(apply, 800), setTimeout(apply, 1600)];
+    window.addEventListener('resize', apply);
+    return () => { timers.forEach(clearTimeout); window.removeEventListener('resize', apply); };
+  }, []);
+
   const toggleTheme = () => {
     setIsDarkMode(prev => !prev);
   };

@@ -163,7 +163,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             const sentDiff = Math.max(0, parseFloat(currentNetworkData.bytes_sent) - parseFloat(previousNetworkData.bytes_sent));
             const recvDiff = Math.max(0, parseFloat(currentNetworkData.bytes_recv) - parseFloat(previousNetworkData.bytes_recv));
             const totalBytesPerSecond = (sentDiff + recvDiff) / timeDiff;
-            setNetworkTraffic(totalBytesPerSecond / 1024); // Convert to KB/s
+            setNetworkTraffic(totalBytesPerSecond); // bytes/s — unit auto-scaled at render (fmtRate)
           }
         }
         
@@ -191,6 +191,16 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
     return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
   };
+
+  // Auto-scaling transfer rate: bytes/s -> B/s, KB/s, MB/s, GB/s (returns value + unit split).
+  const fmtRate = (bps) => {
+    if (bps == null || isNaN(bps)) return { v: '--', u: 'KB/s' };
+    const u = ['B/s', 'KB/s', 'MB/s', 'GB/s'];
+    let i = 0, v = bps;
+    while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+    return { v: v.toFixed(v >= 100 || i === 0 ? 0 : 1), u: u[i] };
+  };
+  const netRate = fmtRate(networkTraffic);
 
   const getTemperatureColor = (temp) => {
     if (temp > 70) return '#e16162';
@@ -357,8 +367,8 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             📊 Network I/O
           </MetricTitle>
           <MetricValue color="#9cb68f">
-            {networkTraffic !== null ? networkTraffic.toFixed(1) : '--'}
-            <MetricUnit>KB/s</MetricUnit>
+            {netRate.v}
+            <MetricUnit>{netRate.u}</MetricUnit>
           </MetricValue>
           <MetricSubtext>
             Real-time network traffic rate
