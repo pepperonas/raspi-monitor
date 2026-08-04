@@ -1,4 +1,5 @@
 import React from 'react';
+import Icon from '../Icon';
 import styled from 'styled-components';
 
 const HeaderContainer = styled.header`
@@ -106,8 +107,8 @@ const Header = ({
   return (
     <HeaderContainer>
       <LeftSection>
-        <MenuButton onClick={onToggleSidebar}>
-          ☰
+        <MenuButton onClick={onToggleSidebar} aria-label="Navigation ein-/ausblenden">
+          <Icon name="menu" />
         </MenuButton>
         <Title>Raspberry Pi {piModel} Monitor</Title>
       </LeftSection>
@@ -122,8 +123,8 @@ const Header = ({
           {alerts.length}
         </AlertsCount>
         
-        <ThemeToggle onClick={onToggleTheme}>
-          {isDarkMode ? '☀️' : '🌙'}
+        <ThemeToggle onClick={onToggleTheme} aria-label={isDarkMode ? 'Helles Design' : 'Dunkles Design'}>
+          <Icon name={isDarkMode ? 'sun' : 'moon'} />
         </ThemeToggle>
       </RightSection>
     </HeaderContainer>

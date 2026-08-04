@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Icon from '../components/Icon';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
@@ -131,7 +132,7 @@ const Alerts = ({ alerts = [], isConnected = false }) => {
       <AlertsContainer>
         <PageTitle>Alerts</PageTitle>
         <NoAlerts>
-          ✅ No alerts to display
+          <Icon name="check" /> No alerts to display
         </NoAlerts>
       </AlertsContainer>
     );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Icon from '../components/Icon';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
@@ -176,7 +177,7 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
       
       {/* CPU Temperature */}
       <ChartContainer>
-        <ChartTitle>🌡️ CPU Temperature</ChartTitle>
+        <ChartTitle><Icon name="thermo" /> CPU Temperature</ChartTitle>
         <TemperatureChart temperature={cpu.cpu_temp_celsius || 0}>
           <TemperatureValue>
             {cpu.cpu_temp_celsius ? `${cpu.cpu_temp_celsius}°` : '--'}
@@ -192,7 +193,7 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
 
       {/* GPU Temperature */}
       <ChartContainer>
-        <ChartTitle>🎮 GPU Temperature</ChartTitle>
+        <ChartTitle><Icon name="gpu" /> GPU Temperature</ChartTitle>
         <TemperatureChart temperature={gpu.gpu_temp_celsius || 0}>
           <TemperatureValue>
             {gpu.gpu_temp_celsius ? `${gpu.gpu_temp_celsius}°` : '--'}
@@ -208,7 +209,7 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
 
       {/* System Metrics */}
       <ChartContainer>
-        <ChartTitle>📊 System Metrics</ChartTitle>
+        <ChartTitle><Icon name="bars" /> System Metrics</ChartTitle>
         <MetricsList>
           <MetricItem>
             <h4>CPU Usage</h4>

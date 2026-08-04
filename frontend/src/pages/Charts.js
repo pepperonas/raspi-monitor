@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Icon from '../components/Icon';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 import {
@@ -219,7 +220,7 @@ const Charts = ({ isConnected = false }) => {
       <ChartsContainer>
         <PageTitle>System Charts</PageTitle>
         <div style={{ textAlign: 'center', color: '#e16162', marginTop: 40, padding: 40, background: 'rgba(225,97,98,0.1)', borderRadius: 28, border: '1px solid rgba(225,97,98,0.2)' }}>
-          <h3 style={{ marginBottom: 16, color: '#e16162' }}>⚠️ Nicht verbunden</h3>
+          <h3 style={{ marginBottom: 16, color: '#e16162' }}><Icon name="warning" /> Nicht verbunden</h3>
           <p style={{ color: '#9ca3af' }}>Keine Diagrammdaten verfügbar</p>
         </div>
       </ChartsContainer>

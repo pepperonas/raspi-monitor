@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Icon from '../components/Icon';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
@@ -260,7 +261,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* CPU Temperature */}
         <TemperatureCard temperature={cpu.cpu_temp_celsius || 0}>
           <MetricTitle>
-            🌡️ CPU Temperature
+            <Icon name="thermo" /> CPU Temperature
           </MetricTitle>
           <MetricValue>
             {cpu.cpu_temp_celsius ? `${cpu.cpu_temp_celsius}°` : '--'}
@@ -274,7 +275,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* GPU Temperature */}
         <TemperatureCard temperature={gpu.gpu_temp_celsius || 0}>
           <MetricTitle>
-            🎮 GPU Temperature
+            <Icon name="gpu" /> GPU Temperature
           </MetricTitle>
           <MetricValue>
             {gpu.gpu_temp_celsius ? `${gpu.gpu_temp_celsius}°` : '--'}
@@ -288,7 +289,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Fan Status */}
         <MetricCard>
           <MetricTitle>
-            🌀 Fan Status
+            <Icon name="fan" /> Fan Status
           </MetricTitle>
           <MetricValue color={gpu.fan_status?.status === 'on' ? '#9cb68f' : '#6b7280'}>
             {gpu.fan_status?.description || 'Unknown'}
@@ -302,7 +303,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* CPU Usage */}
         <MetricCard>
           <MetricTitle>
-            💻 CPU Usage
+            <Icon name="cpu" /> CPU Usage
           </MetricTitle>
           <MetricValue color={cpu.cpu_usage_percent > 80 ? '#e16162' : '#688db1'}>
             {cpu.cpu_usage_percent ? `${cpu.cpu_usage_percent}` : '--'}
@@ -316,7 +317,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Memory Usage */}
         <MetricCard>
           <MetricTitle>
-            🧠 Memory Usage
+            <Icon name="memory" /> Memory Usage
           </MetricTitle>
           <MetricValue color={memory.usage_percent > 80 ? '#e16162' : '#688db1'}>
             {memory.usage_percent ? `${memory.usage_percent}` : '--'}
@@ -333,7 +334,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Disk Usage */}
         <MetricCard>
           <MetricTitle>
-            💾 Disk Usage
+            <Icon name="save" /> Disk Usage
           </MetricTitle>
           <MetricValue color={disk.usage_percent > 80 ? '#e16162' : '#688db1'}>
             {disk.usage_percent ? `${disk.usage_percent}` : '--'}
@@ -350,7 +351,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Network */}
         <MetricCard>
           <MetricTitle>
-            🌐 Network
+            <Icon name="globe" /> Network
           </MetricTitle>
           <MetricValue>
             {network.interface_name || 'N/A'}
@@ -364,7 +365,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Network Traffic Rate */}
         <MetricCard>
           <MetricTitle>
-            📊 Network I/O
+            <Icon name="bars" /> Network I/O
           </MetricTitle>
           <MetricValue color="#9cb68f">
             {netRate.v}
@@ -378,7 +379,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Processes */}
         <MetricCard>
           <MetricTitle>
-            ⚙️ Processes
+            <Icon name="processes" /> Processes
           </MetricTitle>
           <MetricValue>
             {processes.total_processes || '--'}
@@ -391,7 +392,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
         {/* Alerts */}
         <MetricCard>
           <MetricTitle>
-            🚨 Recent Alerts
+            <Icon name="siren" /> Recent Alerts
           </MetricTitle>
           <MetricValue color={alerts.length > 0 ? '#e16162' : '#9cb68f'}>
             {alerts.length}

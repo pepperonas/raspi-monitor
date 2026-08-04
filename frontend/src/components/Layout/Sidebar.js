@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import Icon from '../Icon';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -132,13 +133,13 @@ const Sidebar = ({ isOpen, onToggle }) => {
   const [ind, setInd] = useState({ y: 0, h: 0, show: false });
 
   const navigationItems = [
-    { path: '/dashboard', icon: '📊', text: 'Dashboard' },
-    { path: '/metrics', icon: '📈', text: 'Metrics' },
-    { path: '/charts', icon: '📋', text: 'Charts' },
-    { path: '/alerts', icon: '🚨', text: 'Alerts' },
-    { path: '/tasks', icon: '⚡', text: 'Tasks' },
-    { path: '/system', icon: '⚙️', text: 'System' },
-    { path: '/settings', icon: '🔧', text: 'Settings' }
+    { path: '/dashboard', icon: 'bars', text: 'Dashboard' },
+    { path: '/metrics', icon: 'trend', text: 'Metrics' },
+    { path: '/charts', icon: 'wave', text: 'Charts' },
+    { path: '/alerts', icon: 'siren', text: 'Alerts' },
+    { path: '/tasks', icon: 'bolt', text: 'Tasks' },
+    { path: '/system', icon: 'gear', text: 'System' },
+    { path: '/settings', icon: 'sliders', text: 'Settings' }
   ];
 
   // Measure the active item so the indicator can glide to its exact position.
@@ -162,7 +163,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
       <Overlay visible={isOpen} onClick={onToggle} />
       <SidebarContainer isOpen={isOpen}>
         <SidebarHeader>
-          <Logo>🔥</Logo>
+          <Logo><Icon name="flame" /></Logo>
           <SidebarTitle isOpen={isOpen}>Pi Monitor</SidebarTitle>
         </SidebarHeader>
         
@@ -175,7 +176,7 @@ const Sidebar = ({ isOpen, onToggle }) => {
                 active={location.pathname === item.path}
                 onClick={handleLinkClick}
               >
-                <NavigationIcon>{item.icon}</NavigationIcon>
+                <NavigationIcon><Icon name={item.icon} /></NavigationIcon>
                 <NavigationText isOpen={isOpen}>{item.text}</NavigationText>
               </NavigationLink>
             </NavigationItem>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Icon from './components/Icon';
 import { HashRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
@@ -285,7 +286,7 @@ function App() {
                 />
               </ContentArea>
               <Footer>
-                Made with ❤️ by Martin Pfeffer
+                Made with <Icon name="heart" title="love" /> by Martin Pfeffer
               </Footer>
             </MainContent>
           </AppContainer>
