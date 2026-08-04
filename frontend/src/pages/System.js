@@ -87,13 +87,13 @@ const LEDStatus = styled.div`
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: ${props => props.active ? (props.color || '#4caf50') : '#666'};
-  border: 2px solid ${props => props.active ? (props.color || '#4caf50') : '#666'};
-  box-shadow: ${props => props.active ? '0 0 6px ' + (props.color || '#4caf50') : 'none'};
+  background-color: ${props => props.active ? (props.color || '#7ddfa6') : '#666'};
+  border: 2px solid ${props => props.active ? (props.color || '#7ddfa6') : '#666'};
+  box-shadow: ${props => props.active ? '0 0 6px ' + (props.color || '#7ddfa6') : 'none'};
 `;
 
 const ToggleButton = styled.button`
-  background: ${props => props.active ? '#4caf50' : '#666'};
+  background: ${props => props.active ? '#7ddfa6' : '#666'};
   color: white;
   border: none;
   border-radius: 6px;
@@ -103,7 +103,7 @@ const ToggleButton = styled.button`
   transition: all 0.3s ease;
   
   &:hover {
-    background: ${props => props.active ? '#45a049' : '#555'};
+    background: ${props => props.active ? props.theme.colors.success : props.theme.colors.textMuted};
     transform: translateY(-1px);
   }
   
@@ -173,7 +173,7 @@ const System = ({ isConnected = false }) => {
         </InfoItem>
         <InfoItem>
           <InfoLabel>Connection Status</InfoLabel>
-          <InfoValue style={{ color: isConnected ? '#4caf50' : '#ff6b6b' }}>
+          <InfoValue style={{ color: isConnected ? '#7ddfa6' : '#ff8a80' }}>
             {isConnected ? 'live' : 'offline'}
           </InfoValue>
         </InfoItem>
@@ -184,7 +184,7 @@ const System = ({ isConnected = false }) => {
         
         <LEDControl>
           <LEDLabel>
-            <LEDStatus active={actLedActive} color="#4caf50" />
+            <LEDStatus active={actLedActive} color="#7ddfa6" />
             Activity LED (ACT)
           </LEDLabel>
           <ToggleButton 
@@ -197,7 +197,7 @@ const System = ({ isConnected = false }) => {
         
         <LEDControl>
           <LEDLabel>
-            <LEDStatus active={pwrLedActive} color="#ffa500" />
+            <LEDStatus active={pwrLedActive} color="#f5a04a" />
             Power LED (PWR)
           </LEDLabel>
           <ToggleButton 

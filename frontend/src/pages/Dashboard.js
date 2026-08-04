@@ -97,7 +97,7 @@ const StatusIndicator = styled.div`
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background-color: ${props => props.connected ? '#9cb68f' : '#e16162'};
+  background-color: ${props => props.connected ? '#7ddfa6' : '#ff8a80'};
   animation: ${props => props.connected ? 'pulse 2s infinite' : 'none'};
 
   @keyframes pulse {
@@ -117,29 +117,34 @@ const ConnectionStatus = styled.div`
 `;
 
 const TemperatureCard = styled(MetricCard)`
-  border: none;
+  border: 1px solid ${props => props.theme.colors.border};
   overflow: hidden;
   /* Richer, tonal temp-reactive containers (MD3 container colours, not neon). */
   background: ${props => {
+    // Temperaturband als tonale Flaeche aus der Palette. Vorher waren es vier
+    // fest verdrahtete Verlaufspaare in Toenen, die im Stack sonst nirgends
+    // vorkommen — die Abstufung ist Information und bleibt, die Farben kommen
+    // jetzt von dort, wo alle anderen auch herkommen.
     const temp = props.temperature;
-    if (temp > 70) return 'linear-gradient(135deg, #a83236 0%, #6d1c20 100%)';
-    if (temp > 60) return 'linear-gradient(135deg, #bd7a2c 0%, #8a531a 100%)';
-    if (temp > 50) return 'linear-gradient(135deg, #b0863d 0%, #7e5d24 100%)';
-    return 'linear-gradient(135deg, #4a6a58 0%, #324f3e 100%)';
+    const c = props.theme.colors;
+    const ton = temp > 70 ? c.error : temp > 60 ? c.warning : temp > 50 ? c.warning : c.success;
+    const staerke = temp > 70 ? 26 : temp > 60 ? 22 : temp > 50 ? 16 : 14;
+    return `color-mix(in srgb, ${ton} ${staerke}%, ${c.surface})`;
   }};
-  color: #fff;
+  color: ${props => props.theme.colors.text};
 
   /* Soft radial highlight in the top-right = expressive "lit" hero surface. */
   &::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(120% 92% at 86% 4%, rgba(255, 255, 255, 0.24), transparent 56%);
+    background: none;
     pointer-events: none;
   }
 
-  ${MetricTitle}, ${MetricValue} { color: #fff; position: relative; }
-  ${MetricSubtext} { color: rgba(255, 255, 255, 0.84); position: relative; }
+  ${MetricTitle} { color: ${props => props.theme.colors.textSecondary}; position: relative; }
+  ${MetricValue} { color: ${props => props.theme.colors.text}; position: relative; }
+  ${MetricSubtext} { color: ${props => props.theme.colors.textMuted}; position: relative; }
 `;
 
 const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
@@ -212,10 +217,10 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
   const netRate = fmtRate(networkTraffic);
 
   const getTemperatureColor = (temp) => {
-    if (temp > 70) return '#e16162';
-    if (temp > 60) return '#f59e0b';
-    if (temp > 50) return '#f59e0b';
-    return '#9cb68f';
+    if (temp > 70) return '#ff8a80';
+    if (temp > 60) return '#f5a04a';
+    if (temp > 50) return '#f5a04a';
+    return '#7ddfa6';
   };
 
   // Use dashboard metrics or fallback to WebSocket metrics
@@ -299,7 +304,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="fan" /> Fan Status
           </MetricTitle>
-          <MetricValue color={gpu.fan_status?.status === 'on' ? '#9cb68f' : '#6b7280'}>
+          <MetricValue color={gpu.fan_status?.status === 'on' ? '#7ddfa6' : '#8e9099'}>
             {gpu.fan_status?.description || 'Unknown'}
           </MetricValue>
           <MetricSubtext>
@@ -313,7 +318,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="cpu" /> CPU Usage
           </MetricTitle>
-          <MetricValue color={cpu.cpu_usage_percent > 80 ? '#e16162' : '#688db1'}>
+          <MetricValue color={cpu.cpu_usage_percent > 80 ? '#ff8a80' : '#b3c5ff'}>
             {cpu.cpu_usage_percent ? `${cpu.cpu_usage_percent}` : '--'}
             <MetricUnit>%</MetricUnit>
           </MetricValue>
@@ -327,7 +332,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="memory" /> Memory Usage
           </MetricTitle>
-          <MetricValue color={memory.usage_percent > 80 ? '#e16162' : '#688db1'}>
+          <MetricValue color={memory.usage_percent > 80 ? '#ff8a80' : '#b3c5ff'}>
             {memory.usage_percent ? `${memory.usage_percent}` : '--'}
             <MetricUnit>%</MetricUnit>
           </MetricValue>
@@ -344,7 +349,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="save" /> Disk Usage
           </MetricTitle>
-          <MetricValue color={disk.usage_percent > 80 ? '#e16162' : '#688db1'}>
+          <MetricValue color={disk.usage_percent > 80 ? '#ff8a80' : '#b3c5ff'}>
             {disk.usage_percent ? `${disk.usage_percent}` : '--'}
             <MetricUnit>%</MetricUnit>
           </MetricValue>
@@ -375,7 +380,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="bars" /> Network I/O
           </MetricTitle>
-          <MetricValue color="#9cb68f">
+          <MetricValue color="#7ddfa6">
             {netRate.v}
             <MetricUnit>{netRate.u}</MetricUnit>
           </MetricValue>
@@ -402,7 +407,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="siren" /> Recent Alerts
           </MetricTitle>
-          <MetricValue color={alerts.length > 0 ? '#e16162' : '#9cb68f'}>
+          <MetricValue color={alerts.length > 0 ? '#ff8a80' : '#7ddfa6'}>
             {alerts.length}
           </MetricValue>
           <MetricSubtext>

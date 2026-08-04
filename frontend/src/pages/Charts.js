@@ -21,7 +21,9 @@ const humanRate = (bps) => {
   return `${v.toFixed(v >= 100 || i === 0 ? 0 : 1)} ${u[i]}`;
 };
 
-const ACCENT = { cpu: '#9cb68f', memory: '#b3c5ff', temperature: '#f59e0b', network: '#d0bcff' };
+// Reihenfarben: unterscheiden Messreihen voneinander, das ist Information.
+// Sie stammen aber aus der Palette, damit es nicht eine dritte gibt.
+const ACCENT = { cpu: '#7ddfa6', memory: '#b3c5ff', temperature: '#f5a04a', network: '#c9b8ff' };
 
 const ChartsContainer = styled.div`
   /* Wie die uebrigen Seiten: kein eigenes Polster, das sitzt aussen. */
@@ -222,9 +224,9 @@ const Charts = ({ isConnected = false }) => {
     return (
       <ChartsContainer>
         <PageTitle>System Charts</PageTitle>
-        <div style={{ textAlign: 'center', color: '#e16162', marginTop: 40, padding: 40, background: 'rgba(225,97,98,0.1)', borderRadius: 28, border: '1px solid rgba(225,97,98,0.2)' }}>
-          <h3 style={{ marginBottom: 16, color: '#e16162' }}><Icon name="warning" /> Nicht verbunden</h3>
-          <p style={{ color: '#9ca3af' }}>Keine Diagrammdaten verfügbar</p>
+        <div style={{ textAlign: 'center', color: '#ff8a80', marginTop: 40, padding: 40, background: 'rgba(225,97,98,0.1)', borderRadius: 28, border: '1px solid rgba(225,97,98,0.2)' }}>
+          <h3 style={{ marginBottom: 16, color: '#ff8a80' }}><Icon name="warning" /> Nicht verbunden</h3>
+          <p style={{ color: '#8e9099' }}>Keine Diagrammdaten verfügbar</p>
         </div>
       </ChartsContainer>
     );

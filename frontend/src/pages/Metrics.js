@@ -48,10 +48,11 @@ const TemperatureChart = styled.div`
   /* Refined tonal temp-reactive containers (match the Dashboard hero cards). */
   ${props => {
     const temp = props.temperature;
-    if (temp > 70) return 'background: linear-gradient(135deg, #a83236 0%, #6d1c20 100%);';
-    if (temp > 60) return 'background: linear-gradient(135deg, #bd7a2c 0%, #8a531a 100%);';
-    if (temp > 50) return 'background: linear-gradient(135deg, #b0863d 0%, #7e5d24 100%);';
-    return 'background: linear-gradient(135deg, #4a6a58 0%, #324f3e 100%);';
+    // Tonale Flaeche aus der Palette statt vier eigener Verlaufspaare.
+    const c = props.theme.colors;
+    const ton = temp > 70 ? c.error : temp > 50 ? c.warning : c.success;
+    const staerke = temp > 70 ? 26 : temp > 60 ? 22 : temp > 50 ? 16 : 14;
+    return `background: color-mix(in srgb, ${ton} ${staerke}%, ${c.surface});`;
   }}
 
   &::before {

@@ -30,10 +30,10 @@ const AlertItem = styled.div`
   border: 1px solid ${props => props.theme.colors.border};
   border-left: 4px solid ${props => {
     switch(props.severity) {
-      case 'critical': return '#e16162';
-      case 'high': return '#f59e0b';
-      case 'medium': return '#f59e0b';
-      case 'low': return '#9cb68f';
+      case 'critical': return '#ff8a80';
+      case 'high': return '#f5a04a';
+      case 'medium': return '#f5a04a';
+      case 'low': return '#7ddfa6';
       default: return props.theme.colors.border;
     }
   }};
@@ -63,10 +63,10 @@ const AlertSeverity = styled.div`
   color: white;
   background: ${props => {
     switch(props.severity) {
-      case 'critical': return '#ff6b6b';
-      case 'high': return '#ffa726';
-      case 'medium': return '#ffeb3b';
-      case 'low': return '#4caf50';
+      case 'critical': return '#ff8a80';
+      case 'high': return '#f5a04a';
+      case 'medium': return '#f5a04a';
+      case 'low': return '#7ddfa6';
       default: return props.theme.colors.textSecondary;
     }
   }};

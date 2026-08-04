@@ -87,9 +87,9 @@ const ProgressBar = styled.div`
     height: 100%;
     background: ${props => {
       const val = props.value || 0;
-      if (val > 80) return '#ff6b6b';
-      if (val > 60) return '#ffa500';
-      return '#4caf50';
+      if (val > 80) return '#ff8a80';
+      if (val > 60) return '#f5a04a';
+      return '#7ddfa6';
     }};
     transition: width 0.3s ease;
   }

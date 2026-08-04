@@ -112,7 +112,7 @@ const ThemeToggle = styled.button`
 `;
 
 const AlertsCount = styled.div`
-  background: ${props => props.count > 0 ? '#e16162' : 'transparent'};
+  background: ${props => props.count > 0 ? '#ff8a80' : 'transparent'};
   color: white;
   border-radius: 12px;
   padding: 4px 8px;

@@ -106,7 +106,7 @@ const Settings = ({ isDarkMode, onToggleTheme, wsService }) => {
               Real-time data updates via WebSocket
             </SettingDescription>
           </div>
-          <div style={{ color: wsService?.isConnected ? '#4caf50' : '#ff6b6b' }}>
+          <div style={{ color: wsService?.isConnected ? '#7ddfa6' : '#ff8a80' }}>
             {wsService?.isConnected ? 'live' : 'offline'}
           </div>
         </SettingItem>
