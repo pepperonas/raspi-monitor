@@ -184,6 +184,19 @@
   var THEME_KEY = 'sh-theme';
   var ALT_KEYS = ['dash-theme', 'theme'];   // was die Apps vorher benutzten
 
+  /* Nicht jede App hat ein helles Theme. Der Disco-Visualizer steht bewusst auf
+     fester dunkler Basis (Kontrast zum Farbspiel) und laedt shared/theme.css
+     gar nicht. Dort einen Umschalter anzubieten hiess: die Leiste wird hell,
+     die Seite bleibt dunkel — eine weisse Leiste ueber einem dunklen Bild.
+     Geprueft wird die Bedingung selbst (loesen die geteilten Tokens auf?),
+     nicht ein Stellvertreter wie ein Dateiname. */
+  function hatHellesTheme() {
+    try {
+      return !!getComputedStyle(document.documentElement)
+        .getPropertyValue('--sh-bg').trim();
+    } catch (e) { return false; }
+  }
+
   function readTheme() {
     try {
       var t = localStorage.getItem(THEME_KEY);
@@ -242,17 +255,31 @@
     if (!document.body) return;
     document.body.appendChild(nav);
 
-    var bar = document.createElement('div');
-    bar.id = 'sh-themebar';
-    var btn = document.createElement('button');
-    btn.id = 'sh-themebtn';
-    btn.type = 'button';
-    btn.setAttribute('aria-label', 'Helles oder dunkles Design');
-    btn.addEventListener('click', function () { toggleTheme(btn); });
-    bar.appendChild(btn);
-    document.body.appendChild(bar);
-    bar.style.height = nav.offsetHeight + 'px';
-    applyTheme(readTheme());
+    var themebar = null;
+    if (hatHellesTheme()) {
+      themebar = document.createElement('div');
+      themebar.id = 'sh-themebar';
+      var btn = document.createElement('button');
+      btn.id = 'sh-themebtn';
+      btn.type = 'button';
+      btn.setAttribute('aria-label', 'Helles oder dunkles Design');
+      btn.addEventListener('click', function () { toggleTheme(btn); });
+      themebar.appendChild(btn);
+      document.body.appendChild(themebar);
+      themebar.style.height = nav.offsetHeight + 'px';
+      applyTheme(readTheme());
+    } else {
+      // Ohne helles Theme darf auch der gespeicherte Wert nicht greifen: sonst
+      // faerbt eine anderswo getroffene Wahl hier NUR die Leiste ein.
+      document.documentElement.setAttribute('data-theme', 'dark');
+      // Das rechte Polster bleibt reserviert, obwohl hier kein Knopf steht:
+      // die Badge-Reihe zentriert sich im verbleibenden Raum, und ohne die
+      // Reservierung spränge sie beim App-Wechsel um die halbe Knopfbreite.
+      // Ein leerer Streifen faellt nicht auf, ein Sprung schon.
+    }
+    // Damit Apps ihren Inhalt unter der Leiste ausrichten koennen, ohne sie
+    // selbst nachzumessen (der Disco-Canvas braucht das, der Monitor auch).
+    document.documentElement.style.setProperty('--sh-nav-h', nav.offsetHeight + 'px');
     // Spacer in Leistenhöhe an den Body-Anfang, damit kein Inhalt unter der
     // fixed Bar verschwindet (Höhe nachgemessen, nicht hart kodiert).
     var spacer = document.createElement('div');
@@ -261,7 +288,8 @@
     document.body.insertBefore(spacer, document.body.firstChild);
     window.addEventListener('resize', function () {
       spacer.style.height = nav.offsetHeight + 'px';
-      bar.style.height = nav.offsetHeight + 'px';
+      if (themebar) themebar.style.height = nav.offsetHeight + 'px';
+      document.documentElement.style.setProperty('--sh-nav-h', nav.offsetHeight + 'px');
     });
     var on = nav.querySelector('a.on');
     if (on) nav.scrollLeft = Math.max(0, on.offsetLeft - (nav.clientWidth - on.offsetWidth) / 2);
