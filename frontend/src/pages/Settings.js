@@ -104,7 +104,7 @@ const Settings = ({ isDarkMode, onToggleTheme, wsService }) => {
             </SettingDescription>
           </div>
           <div style={{ color: wsService?.isConnected ? '#4caf50' : '#ff6b6b' }}>
-            {wsService?.isConnected ? 'Connected' : 'Disconnected'}
+            {wsService?.isConnected ? 'live' : 'offline'}
           </div>
         </SettingItem>
       </SettingsGroup>

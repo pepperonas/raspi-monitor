@@ -259,7 +259,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
       
       <ConnectionStatus>
         <StatusIndicator connected={isConnected} />
-        {isConnected ? 'Connected' : 'Disconnected'} • Last updated: {currentTime.toLocaleTimeString()}
+        {isConnected ? 'live' : 'offline'} • Last updated: {currentTime.toLocaleTimeString()}
       </ConnectionStatus>
 
       <MetricsGrid className="md-stagger" onMouseMove={onTilt} onMouseLeave={offTilt}>

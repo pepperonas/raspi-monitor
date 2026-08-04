@@ -171,7 +171,7 @@ const System = ({ isConnected = false }) => {
         <InfoItem>
           <InfoLabel>Connection Status</InfoLabel>
           <InfoValue style={{ color: isConnected ? '#4caf50' : '#ff6b6b' }}>
-            {isConnected ? 'Connected' : 'Disconnected'}
+            {isConnected ? 'live' : 'offline'}
           </InfoValue>
         </InfoItem>
       </SystemInfo>

@@ -50,19 +50,30 @@ const RightSection = styled.div`
   gap: 16px;
 `;
 
+/* Referenzform: Punkt und Wort in einer Pille (siehe shared/theme.css
+   .sh-live). Vorher war es ein freistehender Punkt neben freiem Text — dasselbe
+   Element sah in jeder App anders aus. */
 const StatusIndicator = styled.div`
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 0.45rem;
   color: ${props => props.theme.colors.textSecondary};
-  font-size: 0.9rem;
+  font-size: 0.82rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid ${props => props.theme.colors.border};
+  background: color-mix(in srgb, ${props => props.theme.colors.text} 3%, transparent);
 `;
 
 const StatusDot = styled.div`
   width: 8px;
   height: 8px;
+  flex: 0 0 auto;
   border-radius: 50%;
-  background-color: ${props => props.connected ? '#9cb68f' : '#e16162'};
+  /* Aus dem Theme statt zweier fest verdrahteter Hex-Werte der alten Palette.
+     Getrennt ist grau, nicht rot: „keine Verbindung“ ist kein Fehlerzustand,
+     den man rot anschreien muesste — die Referenz macht es genauso. */
+  background-color: ${props => props.connected ? props.theme.colors.success : props.theme.colors.textMuted};
   animation: ${props => props.connected ? 'pulse 2s infinite' : 'none'};
 
   @keyframes pulse {
@@ -120,7 +131,7 @@ const Header = ({
       <RightSection>
         <StatusIndicator>
           <StatusDot connected={isConnected} />
-          {isConnected ? 'Connected' : 'Disconnected'}
+          {isConnected ? 'live' : 'offline'}
         </StatusIndicator>
         
         <AlertsCount count={alerts.length}>
