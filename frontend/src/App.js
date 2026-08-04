@@ -32,17 +32,16 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
+    /* Aus dem Theme, nicht fest verdrahtet: theme.js ist die einzige Quelle,
+       und ein zweiter Schriftstack hier hat sie schlicht ignoriert. */
+    font-family: ${props => props.theme.typography.fontFamily.sans};
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* MD3 Expressive: tonal radial wash instead of a flat fill — subtle depth. */
+    /* Flach statt zweier Radialverläufe: die dB-Analyse hat ihren aus dem Grund
+       aufgegeben, aus dem er auch hier auffällt — er liest sich als mehrere
+       verschiedene Hintergründe, je nachdem wohin man schaut. */
     background-color: ${props => props.theme.colors.background};
-    background-image:
-      radial-gradient(1100px 620px at 78% -8%, ${props => props.theme.colors.primary}14, transparent 60%),
-      radial-gradient(900px 560px at 0% 108%, ${props => props.theme.colors.secondary}10, transparent 55%);
-    background-attachment: fixed;
+    background-image: none;
     color: ${props => props.theme.colors.text};
     transition: background-color 0.3s ease, color 0.3s ease;
   }

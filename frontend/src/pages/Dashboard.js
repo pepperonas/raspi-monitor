@@ -41,7 +41,9 @@ const MetricCard = styled.div.attrs({ 'data-tilt': true })`
      diffuse shadow + a hairline top highlight instead of a hard 1px border. */
   background: ${props => props.theme.colors.surfaceElevated || props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.borderLight};
-  border-radius: 24px;
+  /* Aus dem Theme, nicht fest verdrahtet — sonst laeuft die eine Karte
+     wieder aus dem Raster, sobald der Token sich aendert. */
+  border-radius: ${props => props.theme.borderRadius.lg};
   padding: 1.6rem;
   box-shadow: ${props => props.theme.shadows.md}, inset 0 1px 0 rgba(255, 255, 255, 0.045);
   transition: transform 220ms var(--md-spring, ease), box-shadow 260ms var(--md-emphasized, ease), border-color 260ms ease;

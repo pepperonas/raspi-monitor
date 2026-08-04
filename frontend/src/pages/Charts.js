@@ -88,7 +88,9 @@ const MetricsSummary = styled.div`
 const MetricCard = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 24px;
+  /* Aus dem Theme, nicht fest verdrahtet — sonst laeuft die eine Karte
+     wieder aus dem Raster, sobald der Token sich aendert. */
+  border-radius: ${props => props.theme.borderRadius.lg};
   padding: 20px;
   text-align: center;
 `;

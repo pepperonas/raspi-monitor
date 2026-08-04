@@ -1,21 +1,23 @@
-// Design tokens — adopted from celox `stats` ("M3 Dark Premium"):
-// deep neutral-dark base, layered surfaces, one teal→violet accent.
-// styled-components read theme.colors.*, so remapping here recolours the whole app.
+// Design tokens — angeglichen an die dB-Analyse (/app/disco/stats), die im
+// Stack als Maßstab dient. Die Werte sind dort gemessen und stimmen mit
+// shared/theme.css überein; diese Datei ist deren JavaScript-Gegenstück, weil
+// styled-components kein Stylesheet lesen, sondern theme.colors.*.
+//
+// Bewusst NICHT übernommen: die Diagrammpalette und der Teal→Violett-Verlauf.
+// Die codieren Bedeutung bzw. die Identität dieser App (bis hin zu ihrem
+// Favicon) — so wie die Klima-Apps ihre Temperatur-/Feuchte-Farben behalten.
 
+// Ein Radius für Flächen, ein kleiner für Eingaben — wie drüben.
 const radii = {
-  sm: '10px',
+  sm: '16px',
   md: '16px',
-  lg: '22px',   // cards
+  lg: '28px',   // Karten
   xl: '28px',
   full: '999px',
 };
 
-const shadows = {
-  sm: '0 1px 2px rgba(0, 0, 0, 0.4)',
-  md: '0 4px 16px rgba(0, 0, 0, 0.35)',
-  lg: '0 12px 40px rgba(0, 0, 0, 0.45)',
-  xl: '0 12px 40px rgba(0, 0, 0, 0.45)',
-};
+// Höhe entsteht über Kontur und Flächenton, nicht über Schlagschatten.
+const shadows = { sm: 'none', md: 'none', lg: 'none', xl: 'none' };
 
 const spacing = {
   xs: '4px', sm: '8px', md: '16px', lg: '24px', xl: '32px', xxl: '48px',
@@ -23,14 +25,16 @@ const spacing = {
 
 const typography = {
   fontFamily: {
-    sans: "'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
+    sans: "'Roboto Flex', Roboto, system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
     mono: "'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace",
   },
   fontSize: {
     xs: '12px', sm: '14px', base: '16px', lg: '18px', xl: '20px',
     '2xl': '24px', '3xl': '30px', '4xl': '36px',
   },
-  fontWeight: { normal: 440, medium: 500, semibold: 650, bold: 720 },
+  // 750 für Kartentitel, 800 für Kennzahlen und Seitentitel — die Referenz
+  // setzt ihre Hierarchie über Gewicht, nicht über Größe.
+  fontWeight: { normal: 440, medium: 500, semibold: 750, bold: 800 },
 };
 
 const breakpoints = { sm: '640px', md: '768px', lg: '1024px', xl: '1280px' };
@@ -60,22 +64,23 @@ export const darkTheme = {
     info: '#6ec8d6',
 
     // tonal dark surfaces (rising tiers)
-    background: '#0e1116',
-    backgroundGrad: 'radial-gradient(1200px 700px at 15% -10%, #161b24 0%, #0e1116 55%)',
-    surface: '#171c25',          // surface-1 (cards)
-    surface0: '#12161d',
-    surfaceElevated: '#1d232e',  // surface-2
-    surfaceHigh: '#242b38',      // surface-3
-    surfaceHover: '#262e3c',
-    card: '#171c25',
+    background: '#0d0e12',
+    // Flach, nicht radial: der Verlauf las sich als zwei Hintergründe.
+    backgroundGrad: '#0d0e12',
+    surface: '#1c1d23',          // Karten
+    surface0: '#121318',
+    surfaceElevated: '#26272d',
+    surfaceHigh: '#26272d',
+    surfaceHover: '#26272d',
+    card: '#1c1d23',
 
-    text: '#e7ecf2',
-    textSecondary: '#9aa4b2',
-    textMuted: '#6b7484',
+    text: '#e4e2e9',
+    textSecondary: '#c5c6d0',
+    textMuted: '#8e9099',
 
-    border: '#262d39',
-    borderLight: '#1d232e',
-    borderStrong: '#333c4b',
+    border: '#44464f',
+    borderLight: '#44464f',
+    borderStrong: '#44464f',
 
     shadow: 'rgba(0, 0, 0, 0.45)',
     shadowLight: 'rgba(0, 0, 0, 0.3)',
@@ -83,7 +88,7 @@ export const darkTheme = {
     online: '#56d364',
     offline: '#f06c6c',
 
-    track: '#2a323f',
+    track: '#26272d',
     scrim: 'rgba(6, 8, 12, 0.62)',
 
     chart,
@@ -97,30 +102,26 @@ export const lightTheme = {
     primary: '#2f8f9c',
     primaryHover: '#4dd0c4',
     onAccent: '#ffffff',
-    background: '#f4f6fa',
-    backgroundGrad: 'radial-gradient(1200px 700px at 15% -10%, #ffffff 0%, #eef1f7 55%)',
+    background: '#eef1f7',
+    backgroundGrad: '#eef1f7',   // flach, wie im dunklen Theme
     surface: '#ffffff',
     surface0: '#ffffff',
-    surfaceElevated: '#f3f5fa',
-    surfaceHigh: '#e9edf4',
-    surfaceHover: '#eef1f7',
+    surfaceElevated: '#e8ebf2',
+    surfaceHigh: '#e8ebf2',
+    surfaceHover: '#e8ebf2',
     card: '#ffffff',
-    text: '#1a2230',
-    textSecondary: '#5a6472',
-    textMuted: '#8a94a4',
-    border: '#dde3ec',
-    borderLight: '#e9edf4',
-    borderStrong: '#c7cfdc',
-    track: '#dbe1ea',
+    text: '#1a1c22',
+    textSecondary: '#4a4d57',
+    textMuted: '#6d7079',
+    border: '#c9ccd6',
+    borderLight: '#c9ccd6',
+    borderStrong: '#c9ccd6',
+    track: '#e8ebf2',
     scrim: 'rgba(20, 26, 36, 0.35)',
   },
   spacing, borderRadius: radii,
-  shadows: {
-    sm: '0 1px 2px rgba(20, 30, 50, 0.08)',
-    md: '0 4px 16px rgba(20, 30, 50, 0.1)',
-    lg: '0 12px 40px rgba(20, 30, 50, 0.14)',
-    xl: '0 12px 40px rgba(20, 30, 50, 0.14)',
-  },
+  // Auch hell schattenlos — Höhe über Kontur und Flächenton.
+  shadows: { sm: 'none', md: 'none', lg: 'none', xl: 'none' },
   typography, breakpoints,
 };
 
