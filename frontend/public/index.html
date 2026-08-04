@@ -12,14 +12,14 @@
         var base = "%PUBLIC_URL%";
         document.title = "Monitor " + n + " · Raspberry Pi";
         document.write(
-          '<link rel="icon" type="image/svg+xml" href="' + base + "/favicon-" + n + ".svg?v=" + v + '">' +
-          '<link rel="shortcut icon" href="' + base + "/favicon-" + n + ".ico?v=" + v + '" type="image/x-icon">' +
-          '<link rel="icon" href="' + base + "/favicon-" + n + ".ico?v=" + v + '" type="image/x-icon">' +
-          '<link rel="icon" type="image/png" sizes="32x32" href="' + base + "/favicon-" + n + "-32x32.png?v=" + v + '">' +
-          '<link rel="icon" type="image/png" sizes="16x16" href="' + base + "/favicon-" + n + "-16x16.png?v=" + v + '">' +
-          '<link rel="apple-touch-icon" sizes="180x180" href="' + base + "/apple-touch-icon-" + n + ".png?v=" + v + '">' +
-          '<link rel="icon" type="image/png" sizes="192x192" href="' + base + "/android-chrome-" + n + '-192x192.png?v=' + v + '">' +
-          '<link rel="icon" type="image/png" sizes="512x512" href="' + base + "/android-chrome-" + n + '-512x512.png?v=' + v + '">'
+          '' +
+          '' +
+          '' +
+          '' +
+          '' +
+          '' +
+          '' +
+          ''
         );
       })();
     </script>
@@ -35,8 +35,7 @@
     <meta name="msapplication-TileColor" content="#0E1116">
 
     <!-- Fallbacks if script blocked (Monitor 3 defaults) -->
-    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg?v=20260731m">
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+<link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <script>
       // Sync apple title + manifest name to Monitor 3/5 after parse
@@ -55,6 +54,8 @@
       });
     </script>
     <script src="/shared/nav.js" defer></script>
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg">
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/apple-touch-icon.png">
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
