@@ -24,7 +24,8 @@ const humanRate = (bps) => {
 const ACCENT = { cpu: '#9cb68f', memory: '#b3c5ff', temperature: '#f59e0b', network: '#d0bcff' };
 
 const ChartsContainer = styled.div`
-  padding: 24px;
+  /* Wie die uebrigen Seiten: kein eigenes Polster, das sitzt aussen. */
+  padding: 0;
   max-width: 1200px;
   margin: 0 auto;
 `;

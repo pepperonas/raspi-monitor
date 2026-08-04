@@ -115,6 +115,8 @@ const MainContent = styled.main`
   flex: 1;
   display: flex;
   flex-direction: column;
+  padding: 0 17.6px;   /* seitliches Polster wie am body des Massstabs */
+  box-sizing: border-box;
   margin-left: ${props => props.sidebarOpen ? '280px' : '60px'};
   transition: margin-left 0.3s ease;
   min-height: 100vh;
@@ -126,7 +128,13 @@ const MainContent = styled.main`
 
 const ContentArea = styled.div`
   flex: 1;
-  padding: 20px;
+  /* Satzspiegel 1200 px OHNE eigenes seitliches Polster — das sitzt eine Ebene
+     hoeher an MainContent. 1200 mit Innenabstand waeren 1160 und laegen neben
+     allen anderen Apps. Ohne Begrenzung lief der Inhalt hier ueber 1626 px. */
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 0 56px;
   overflow-y: auto;
 `;
 
@@ -172,10 +180,22 @@ function AppRoutes({ metrics, alerts, isConnected, isDarkMode, toggleTheme, wsSe
 }
 
 function App() {
+  // Das Theme kommt aus der geteilten Leiste (shared/nav.js), damit die Wahl
+  // hier dieselbe ist wie in den uebrigen Apps. styled-components lesen kein
+  // data-theme, also hoeren wir auf das Ereignis, das nav.js beim Umschalten
+  // feuert — und lesen beim Start denselben Schluessel.
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
+    const shared = localStorage.getItem('sh-theme');
+    if (shared === 'light' || shared === 'dark') return shared === 'dark';
+    const saved = localStorage.getItem('darkMode');   // vorheriger App-Schluessel
     return saved ? JSON.parse(saved) : true;
   });
+
+  useEffect(() => {
+    const onTheme = e => setIsDarkMode(e.detail.theme !== 'light');
+    window.addEventListener('sh-theme', onTheme);
+    return () => window.removeEventListener('sh-theme', onTheme);
+  }, []);
 
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     const saved = localStorage.getItem('sidebarOpen');
@@ -246,8 +266,14 @@ function App() {
     return () => { timers.forEach(clearTimeout); window.removeEventListener('resize', apply); };
   }, []);
 
+  // Umgeschaltet wird ausschliesslich ueber den Knopf in der geteilten Leiste
+  // — sonst gaebe es auf einem Bildschirm zwei Bedienelemente fuer dieselbe
+  // Sache, die sich gegenseitig ueberschreiben.
   const toggleTheme = () => {
-    setIsDarkMode(prev => !prev);
+    const next = isDarkMode ? 'light' : 'dark';
+    try { localStorage.setItem('sh-theme', next); } catch (e) {}
+    window.dispatchEvent(new CustomEvent('sh-theme', { detail: { theme: next } }));
+    document.documentElement.setAttribute('data-theme', next);
   };
 
   const toggleSidebar = () => {

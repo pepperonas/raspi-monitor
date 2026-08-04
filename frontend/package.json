@@ -25,7 +25,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "serve": "serve -s build -l 3000"
+    "serve": "serve -s build -l 3000",
+    "sync:shared": "cp ../smart-home-dashboard/shared/nav.js ../smart-home-dashboard/shared/icons.js ../smart-home-dashboard/shared/theme.css public/shared/",
+    "prebuild": "npm run sync:shared"
   },
   "eslintConfig": {
     "extends": [

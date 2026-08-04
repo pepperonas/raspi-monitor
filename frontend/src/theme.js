@@ -3,9 +3,10 @@
 // shared/theme.css überein; diese Datei ist deren JavaScript-Gegenstück, weil
 // styled-components kein Stylesheet lesen, sondern theme.colors.*.
 //
-// Bewusst NICHT übernommen: die Diagrammpalette und der Teal→Violett-Verlauf.
-// Die codieren Bedeutung bzw. die Identität dieser App (bis hin zu ihrem
-// Favicon) — so wie die Klima-Apps ihre Temperatur-/Feuchte-Farben behalten.
+// Bewusst NICHT übernommen: die Diagrammpalette. Sie unterscheidet Messreihen
+// voneinander, das ist Information — so wie die Klima-Apps ihre Temperatur- und
+// Feuchte-Farben behalten. Der Akzent dagegen codierte nichts und ist seit dem
+// 2026-08-04 der des restlichen Stacks (vorher Türkis→Violett).
 
 // Ein Radius für Flächen, ein kleiner für Eingaben — wie drüben.
 const radii = {
@@ -48,14 +49,15 @@ const chart = {
 
 export const darkTheme = {
   colors: {
-    // teal→violet accent
-    primary: '#6ec8d6',
-    primaryHover: '#4dd0c4',
-    accentTeal: '#4dd0c4',
-    accentViolet: '#9b8cff',
-    accentGradient: 'linear-gradient(135deg, #4dd0c4 0%, #9b8cff 100%)',
-    accentGradientSoft: 'linear-gradient(135deg, color-mix(in srgb, #4dd0c4 22%, transparent) 0%, color-mix(in srgb, #9b8cff 22%, transparent) 100%)',
-    onAccent: '#08222a',
+    // Akzent wie im ganzen uebrigen Stack (--sh-primary). Tuerkis/Violett
+    // codierte hier nichts, es war schlicht eine andere Palette.
+    primary: '#b3c5ff',
+    primaryHover: '#c9d6ff',
+    accentTeal: '#b3c5ff',
+    accentViolet: '#c9b8ff',
+    accentGradient: 'linear-gradient(135deg, #b3c5ff 0%, #c9b8ff 100%)',
+    accentGradientSoft: 'linear-gradient(135deg, color-mix(in srgb, #b3c5ff 22%, transparent) 0%, color-mix(in srgb, #c9b8ff 22%, transparent) 100%)',
+    onAccent: '#0a285a',
 
     secondary: '#9aa4b2',
     // Zustandsfarben = shared/theme.css (--sh-ok/--sh-warn/--sh-loud). Sie stehen
@@ -65,7 +67,7 @@ export const darkTheme = {
     success: '#7ddfa6',
     warning: '#f5a04a',
     error: '#ff8a80',
-    info: '#6ec8d6',
+    info: '#7ea2ff',
 
     // tonal dark surfaces (rising tiers)
     background: '#0d0e12',
@@ -103,8 +105,8 @@ export const darkTheme = {
 export const lightTheme = {
   colors: {
     ...darkTheme.colors,
-    primary: '#2f8f9c',
-    primaryHover: '#4dd0c4',
+    primary: '#2f5bd0',
+    primaryHover: '#2952cc',
     onAccent: '#ffffff',
     background: '#eef1f7',
     backgroundGrad: '#eef1f7',   // flach, wie im dunklen Theme

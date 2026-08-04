@@ -4,7 +4,10 @@ import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
 const AlertsContainer = styled.div`
-  padding: 20px;
+  /* Kein eigenes Polster: 1200 px MIT 20 px Innenabstand sind ein Satzspiegel
+     von 1160 und liegen damit neben allen anderen Apps. Das seitliche Polster
+     sitzt aussen an der Inhaltsflaeche — so macht es der Massstab. */
+  padding: 0;
   max-width: 1200px;
   margin: 0 auto;
 `;

@@ -1,0 +1,248 @@
+/* =============================================================================
+   Gemeinsames Theme des Smart-Home-Stacks — die dB-Analyse als Maßstab
+   -----------------------------------------------------------------------------
+   Jede App trug bisher ihr eigenes Theme: neun Kopien derselben Absicht, die
+   auseinandergelaufen sind. Gleiche Farben, aber 1152 statt 1200 px Satzspiegel,
+   24 statt 14 px Kartenabstand, 16 statt 2,4 px unter der Überschrift — Werte,
+   die einzeln niemand bemerkt und die zusammen dafür sorgen, dass zwei Apps
+   nebeneinander nie ganz zusammenpassen.
+
+   Diese Datei ist die einzige Quelle. Die Zahlen sind nicht geschätzt, sondern
+   an `/app/disco/stats` gemessen und hier als Token hinterlegt.
+
+   WICHTIG — sie ist zum ERSETZEN gedacht, nicht zum Überlagern. Wer sie
+   einbindet und die alten Theme-Regeln stehen lässt, bekommt einen
+   Spezifitätskampf statt eines Themes: `.header` schlägt `header`, und die
+   überschriebene Regel gewinnt trotzdem. Genau daran ist die Kopf-Platte im
+   Yamaha-Controller drei Runden lang vorbeigerutscht.
+
+   Einbinden VOR dem app-eigenen <style>, damit App-Regeln bewusst gewinnen
+   können, wo eine App wirklich etwas Eigenes braucht:
+       <link rel="stylesheet" href="/shared/theme.css">
+   ============================================================================= */
+
+/* ---- Schrift ------------------------------------------------------------- */
+/* Roboto Flex als Variable Font, selbst gehostet — kein externer Font-Host,
+   der Stack ist LAN-tauglich. Beim Direktaufruf am nginx vorbei (Port 5001 usw.)
+   fehlt /shared/, dann greift der System-Stack dahinter. */
+@font-face{
+  font-family:'Roboto Flex';
+  src:url('/shared/fonts/RobotoFlex.woff2') format('woff2-variations');
+  font-weight:100 1000; font-stretch:25% 151%; font-display:swap;
+}
+
+:root{
+  /* ---- Farbe: dunkel (Grundzustand) ------------------------------------- */
+  --sh-bg:        #121318;   /* Flächen-Grundton */
+  --sh-bg2:       #0d0e12;   /* Seite — der dunkelste Ton, flach */
+  --sh-surface:   #1c1d23;   /* Karten, Kacheln */
+  --sh-surface2:  #26272d;   /* Eingaben, gehobene Flächen */
+  --sh-primary:   #b3c5ff;
+  --sh-on-primary:#0a285a;   /* dunkler Text AUF dem hellen Primary */
+  --sh-text:      #e4e2e9;
+  --sh-text2:     #c5c6d0;
+  --sh-muted:     #8e9099;
+  --sh-outline:   #44464f;
+  --sh-loud:      #ff8a80;   /* Warnung/Gefahr */
+  --sh-on-loud:   #3b0606;
+  --sh-ok:        #7ddfa6;
+  --sh-on-ok:     #06351c;
+  /* Die Stufe zwischen ok und loud: „läuft noch, aber sieh hin" — veraltete
+     Messwerte, Lüfter über der Hälfte. Ohne sie greifen Apps zu Rot und
+     verbrauchen die Alarmfarbe für Zustände, die kein Alarm sind. */
+  --sh-warn:      #f5a04a;
+  --sh-on-warn:   #3a2000;
+  --sh-accent:    #7ea2ff;   /* Diagramme */
+
+  /* ---- Form -------------------------------------------------------------- */
+  /* EIN Radius für Karten und Kacheln. Die Apps hatten vierstufige Skalen; eine
+     Stufe reicht, sobald Höhe über Kontur statt über Schatten entsteht. */
+  --sh-radius:    28px;
+  --sh-radius-sm: 16px;      /* nur Eingabefelder */
+  --sh-pill:      999px;
+
+  /* ---- Maß und Abstand --------------------------------------------------- */
+  /* Satzspiegel 1200 px, und zwar am WRAP ohne eigenes Polster — das Polster
+     sitzt am body. Wer stattdessen 1200 px mit 24 px Innenabstand nimmt, hat
+     1152 px Inhalt und liegt 48 px daneben. */
+  --sh-measure:   1200px;
+  --sh-pad-x:     1.1rem;
+  --sh-pad-top:   1.25rem;
+  --sh-pad-bottom:3.5rem;
+  --sh-gap:        .85rem;   /* zwischen Kacheln */
+  --sh-gap-lg:    1rem;      /* zwischen Abschnitten */
+  --sh-card-pad:  1.15rem 1.2rem 1rem;
+  --sh-tile-pad:  1.1rem 1.15rem;
+
+  /* ---- Bewegung ---------------------------------------------------------- */
+  --sh-ease:      cubic-bezier(0.2,0,0,1);
+  --sh-spring:    cubic-bezier(0.34,1.42,0.5,1);
+  --sh-dur:       .22s;
+
+  /* ---- Typografie -------------------------------------------------------- */
+  --sh-font: "Roboto Flex", Roboto, system-ui, -apple-system, sans-serif;
+}
+
+/* ---- Farbe: hell ---------------------------------------------------------
+   Die dB-Analyse selbst hat kein helles Theme. Drei Apps haben eins und sollen
+   es behalten, also wird es hier mitgeführt statt in jeder App neu erfunden.
+   Die Rollen bleiben identisch, nur die Töne kippen — deshalb funktioniert
+   jede Regel unten in beiden Themes unverändert. */
+[data-theme="light"]{
+  --sh-bg:        #f4f6fa;
+  --sh-bg2:       #eef1f7;
+  --sh-surface:   #ffffff;
+  --sh-surface2:  #e8ebf2;
+  --sh-primary:   #2f5bd0;
+  --sh-on-primary:#ffffff;
+  --sh-text:      #1a1c22;
+  --sh-text2:     #4a4d57;
+  --sh-muted:     #6d7079;
+  --sh-outline:   #c9ccd6;
+  --sh-loud:      #c0271c;
+  --sh-on-loud:   #ffffff;
+  --sh-ok:        #1d7a4c;
+  --sh-on-ok:     #ffffff;
+  --sh-warn:      #9a5a00;
+  --sh-on-warn:   #ffffff;
+  --sh-accent:    #2f5bd0;
+}
+
+/* =============================================================================
+   Grundstil auf Element-Ebene — braucht keine Klassennamen und gilt daher in
+   jeder App gleich, egal wie ihre Komponenten heißen.
+
+   ⚠️ Er greift nur, wo die App nichts Eigenes definiert. `h1{}` hier verliert
+   gegen ein app-eigenes `.header h1` (0-0-1 gegen 0-1-1) — und zwar lautlos.
+   Wo eine App ihre Überschriften selbst stylt, muss die Angleichung dort auf
+   Klassenebene stehen. Das ist keine Schwäche der Datei, sondern der Grund,
+   warum die alten Theme-Regeln GELÖSCHT und nicht überlagert gehören.
+   ============================================================================= */
+
+*{ margin:0; box-sizing:border-box }
+html{ height:100% }
+
+body{
+  background: var(--sh-bg2);
+  color: var(--sh-text);
+  font-family: var(--sh-font);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100%;
+  padding: var(--sh-pad-top) var(--sh-pad-x) var(--sh-pad-bottom);
+  padding-left:  max(var(--sh-pad-x), env(safe-area-inset-left));
+  padding-right: max(var(--sh-pad-x), env(safe-area-inset-right));
+}
+
+h1{ font-size:clamp(1.85rem,5vw,2.55rem); font-weight:800; letter-spacing:-.03em; line-height:1.05 }
+h2{ font-size:1.05rem; font-weight:750; letter-spacing:-.01em; color:var(--sh-text) }
+h3{ font-size:.95rem; font-weight:700; color:var(--sh-text2) }
+
+a{ color:var(--sh-primary) }
+
+/* Sichtbarer Fokus in beiden Themes — Tastaturbedienung darf nicht davon
+   abhängen, welche App man gerade offen hat. */
+:focus-visible{ outline:2px solid var(--sh-primary); outline-offset:3px }
+
+/* =============================================================================
+   Bausteine. Bewusst mit `sh-`-Präfix: eine App kann sie direkt benutzen, ohne
+   dass diese Datei etwas über ihre Klassennamen wissen muss.
+   ============================================================================= */
+
+.sh-wrap{ max-width:var(--sh-measure); margin:0 auto }
+
+.sh-head{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:1rem; flex-wrap:wrap; margin-bottom:1.25rem;
+}
+.sh-sub{ color:var(--sh-text2); font-size:.9rem; margin-top:.35rem }
+
+.sh-card{
+  background:var(--sh-surface); border:1px solid var(--sh-outline);
+  border-radius:var(--sh-radius); padding:var(--sh-card-pad);
+  position:relative; overflow:hidden; min-width:0;
+}
+
+.sh-tile{
+  background:var(--sh-surface); border:1px solid var(--sh-outline);
+  border-radius:var(--sh-radius); padding:var(--sh-tile-pad);
+  position:relative; overflow:hidden; min-height:112px;
+}
+/* Label klein in Versalien, Zahl groß und tabellarisch: nur mit
+   `tabular-nums` steht die Ziffernfolge still, wenn sich der Wert ändert. */
+.sh-label{ color:var(--sh-text2); font-size:.76rem; font-weight:650;
+           letter-spacing:.04em; text-transform:uppercase }
+.sh-val{ font-size:clamp(1.65rem,4vw,2.25rem); font-weight:800; line-height:1.05;
+         margin-top:.4rem; font-variant-numeric:tabular-nums }
+.sh-hint{ color:var(--sh-muted); font-size:.74rem; margin-top:.3rem }
+
+.sh-pill{
+  border:1px solid var(--sh-outline); border-radius:var(--sh-pill);
+  padding:.45rem 1rem; background:color-mix(in srgb, var(--sh-text) 4%, transparent);
+  color:var(--sh-text2); font-weight:700; font-size:.78rem; letter-spacing:.02em;
+  cursor:pointer; transition:all var(--sh-dur) var(--sh-ease);
+}
+.sh-pill:hover{ background:color-mix(in srgb, var(--sh-primary) 10%, transparent);
+                color:var(--sh-text) }
+.sh-pill.on, .sh-pill.active{
+  background:var(--sh-primary); color:var(--sh-on-primary); border-color:transparent;
+  box-shadow:0 0 14px color-mix(in srgb, var(--sh-primary) 45%, transparent);
+}
+
+.sh-btn{
+  border:0; border-radius:var(--sh-pill); padding:.65rem 1.15rem;
+  font-weight:800; font-family:inherit; cursor:pointer;
+  background:var(--sh-primary); color:var(--sh-on-primary);
+  transition:all var(--sh-dur) var(--sh-ease);
+}
+.sh-btn.ok{ background:var(--sh-ok); color:var(--sh-on-ok) }
+.sh-btn.danger{ background:var(--sh-loud); color:var(--sh-on-loud) }
+
+.sh-input, .sh-select{
+  background:var(--sh-surface2); border:1px solid var(--sh-outline);
+  border-radius:var(--sh-radius-sm); color:var(--sh-text);
+  padding:.65rem .9rem; font:inherit;
+}
+
+.sh-gap{ margin-top:var(--sh-gap-lg) }
+
+/* ---- Wiederkehrende Bausteine ---------------------------------------------
+   Diese drei tauchen in fast jeder App auf und hatten dort je eine eigene
+   Bauform: die Statusanzeige in drei (.live-dot / .status-indicator /
+   .status-dot), der Theme-Umschalter in zweien plus einem Schalter zwischen
+   zwei Emoji. Wer durch die Apps blättert, sieht dasselbe Ding dreimal anders.
+   -------------------------------------------------------------------------- */
+
+/* Status: eine Pille mit Punkt. Grün = Verbindung steht, grau = nicht.
+   Die Textbreite ist fixiert, weil das Wort zwischen „verbinde…“, „live“ und
+   „offline“ wechselt — die paar Pixel Unterschied kippten in der Referenz auf
+   17 Viewport-Breiten ein Badge in die nächste Zeile und wieder zurück. */
+.sh-live{
+  display:inline-flex; align-items:center; gap:.45rem;
+  color:var(--sh-text2); font-size:.82rem;
+  padding:.4rem .7rem; border-radius:var(--sh-pill);
+  border:1px solid var(--sh-outline);
+  background:color-mix(in srgb, var(--sh-text) 3%, transparent);
+}
+.sh-live .d{ width:8px; height:8px; border-radius:50%; background:var(--sh-muted); flex:0 0 auto }
+.sh-live.on .d{ background:var(--sh-ok); box-shadow:0 0 10px var(--sh-ok) }
+.sh-live .t{ min-width:4.2em; text-align:center; display:inline-block }
+
+/* Theme-Umschalter: ein runder Icon-Knopf, kein Schalter und keine Emoji
+   daneben. Ein Schalter verspricht „an/aus“; hier wird zwischen zwei
+   gleichwertigen Zuständen gewechselt, und das ist ein Knopf. */
+.sh-theme-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:40px; padding:0;
+  border:1px solid var(--sh-outline); border-radius:var(--sh-pill);
+  background:color-mix(in srgb, var(--sh-text) 4%, transparent);
+  color:var(--sh-text2); cursor:pointer; font-size:1.05rem; line-height:1;
+  transition:all var(--sh-dur) var(--sh-ease);
+}
+.sh-theme-btn:hover{
+  background:color-mix(in srgb, var(--sh-primary) 12%, transparent);
+  color:var(--sh-text);
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.01ms !important; transition-duration:.01ms !important }
+}

@@ -2,15 +2,27 @@ import React from 'react';
 import Icon from '../Icon';
 import styled from 'styled-components';
 
+/* Kein abgesetzter Balken mehr: der Kopf ist Teil der Seite und fluchtet mit
+   der Inhaltsspalte — so wie in jeder anderen App im Stack. Vorher stand er auf
+   eigener Flaeche mit Rahmen, fester Hoehe und Schlagschatten und lief ueber die
+   volle Fensterbreite, waehrend der Inhalt darunter bei 1200 px endete: Titel
+   und Karten begannen also an verschiedenen Kanten. */
 const HeaderContainer = styled.header`
-  background: ${props => props.theme.colors.surface};
-  border-bottom: 1px solid ${props => props.theme.colors.border};
-  padding: 0 20px;
-  height: 64px;
+  background: transparent;
+  border-bottom: 0;
+  box-shadow: none;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  /* Kein Oberpolster: die 20 px zum Leistenrand kommen bereits vom body
+     (der Spacer von nav.js beginnt dahinter). Beides zusammen ergab 40 —
+     derselbe Doppelabstand wie in hue, PowerHiFi und fog. */
+  padding: 0;   /* seitliches Polster kommt von MainContent */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+  gap: 16px;
+  flex-wrap: wrap;
 `;
 
 const LeftSection = styled.div`
@@ -33,9 +45,11 @@ const MenuButton = styled.button`
   }
 `;
 
-/* Der Kopfbalken traegt den Geraetenamen, nicht den Seitentitel — er bleibt
-   kleiner als die Seitenueberschrift, uebernimmt aber deren Gewicht und
-   Tracking, damit beide erkennbar aus derselben Schrift kommen. */
+/* Diese Zeile traegt den GERAETENAMEN, nicht den Seitentitel — der steht
+   darunter ("Dashboard", "System", ...) und ist das Gegenstueck zum h1 der
+   uebrigen Apps. Sie auf dessen Mass zu bringen war ein Fehlgriff: dann standen
+   zwei 40-px-Ueberschriften uebereinander. Sie bleibt klein und uebernimmt nur
+   Gewicht und Tracking, damit beide erkennbar aus derselben Schrift kommen. */
 const Title = styled.h1`
   color: ${props => props.theme.colors.text};
   font-size: 1.25rem;
@@ -122,13 +136,13 @@ const Header = ({
   return (
     <HeaderContainer>
       <LeftSection>
-        <MenuButton onClick={onToggleSidebar} aria-label="Navigation ein-/ausblenden">
-          <Icon name="menu" />
-        </MenuButton>
         <Title>Raspberry Pi {piModel} Monitor</Title>
       </LeftSection>
       
       <RightSection>
+        <MenuButton onClick={onToggleSidebar} aria-label="Navigation ein-/ausblenden">
+          <Icon name="menu" />
+        </MenuButton>
         <StatusIndicator>
           <StatusDot connected={isConnected} />
           {isConnected ? 'live' : 'offline'}
@@ -138,9 +152,6 @@ const Header = ({
           {alerts.length}
         </AlertsCount>
         
-        <ThemeToggle onClick={onToggleTheme} aria-label={isDarkMode ? 'Helles Design' : 'Dunkles Design'}>
-          <Icon name={isDarkMode ? 'sun' : 'moon'} />
-        </ThemeToggle>
       </RightSection>
     </HeaderContainer>
   );
