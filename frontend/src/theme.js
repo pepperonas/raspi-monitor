@@ -58,9 +58,13 @@ export const darkTheme = {
     onAccent: '#08222a',
 
     secondary: '#9aa4b2',
-    success: '#56d364',
-    warning: '#e3b341',
-    error: '#f06c6c',
+    // Zustandsfarben = shared/theme.css (--sh-ok/--sh-warn/--sh-loud). Sie stehen
+    // hier zwangsläufig doppelt, weil styled-components kein Stylesheet lesen —
+    // aber sie müssen dieselben Werte tragen. Das Grün wich vorher ab, also war
+    // "Verbindung steht" im Monitor ein anderes Grün als in allen übrigen Apps.
+    success: '#7ddfa6',
+    warning: '#f5a04a',
+    error: '#ff8a80',
     info: '#6ec8d6',
 
     // tonal dark surfaces (rising tiers)
@@ -85,8 +89,8 @@ export const darkTheme = {
     shadow: 'rgba(0, 0, 0, 0.45)',
     shadowLight: 'rgba(0, 0, 0, 0.3)',
 
-    online: '#56d364',
-    offline: '#f06c6c',
+    online: '#7ddfa6',
+    offline: '#ff8a80',
 
     track: '#26272d',
     scrim: 'rgba(6, 8, 12, 0.62)',
@@ -116,6 +120,13 @@ export const lightTheme = {
     border: '#c9ccd6',
     borderLight: '#c9ccd6',
     borderStrong: '#c9ccd6',
+    // Die Zustandsfarben müssen mitkippen: die hellen Töne des dunklen Themes
+    // stehen auf Weiß fast nicht mehr. Werte wie im geteilten Blatt.
+    success: '#1d7a4c',
+    warning: '#9a5a00',
+    error: '#c0271c',
+    online: '#1d7a4c',
+    offline: '#c0271c',
     track: '#e8ebf2',
     scrim: 'rgba(20, 26, 36, 0.35)',
   },
