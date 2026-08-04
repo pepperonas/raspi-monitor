@@ -33,10 +33,14 @@ const MenuButton = styled.button`
   }
 `;
 
+/* Der Kopfbalken traegt den Geraetenamen, nicht den Seitentitel — er bleibt
+   kleiner als die Seitenueberschrift, uebernimmt aber deren Gewicht und
+   Tracking, damit beide erkennbar aus derselben Schrift kommen. */
 const Title = styled.h1`
   color: ${props => props.theme.colors.text};
-  font-size: 1.5rem;
-  font-weight: 600;
+  font-size: 1.25rem;
+  font-weight: 750;
+  letter-spacing: -0.01em;
   margin: 0;
 `;
 

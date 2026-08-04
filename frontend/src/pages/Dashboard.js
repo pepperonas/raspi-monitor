@@ -10,16 +10,15 @@ const DashboardContainer = styled.div`
 `;
 
 const PageTitle = styled.h1`
+  /* Wie die Referenz: eine Groesse, ein Gewicht, keine Verlaufsfuellung.
+     Der Farbverlauf im Text war das einzige Display-Element im Stack, das
+     die Ueberschrift zur Grafik machte statt zur Ueberschrift. */
   margin-bottom: 8px;
-  font-size: 2.7rem;
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  line-height: 1.1;
-  /* MD3 Expressive: display heading with a tonal gradient sweep into primary. */
-  background: linear-gradient(100deg, ${props => props.theme.colors.text} 32%, ${props => props.theme.colors.primary});
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  font-size: clamp(1.85rem, 5vw, 2.55rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  color: ${props => props.theme.colors.text};
   width: fit-content;
 `;
 
@@ -37,39 +36,43 @@ const MetricsGrid = styled.div`
 
 const MetricCard = styled.div.attrs({ 'data-tilt': true })`
   position: relative;
-  /* MD3 tonal elevation: card sits one surface tier above the background, soft
-     diffuse shadow + a hairline top highlight instead of a hard 1px border. */
-  background: ${props => props.theme.colors.surfaceElevated || props.theme.colors.surface};
-  border: 1px solid ${props => props.theme.colors.borderLight};
+  /* Hoehe ueber Kontur und Flaechenton, wie in der Referenz — nicht ueber eine
+     zusaetzliche Flaechenstufe plus Schatten plus Glanzkante. */
+  background: ${props => props.theme.colors.surface};
+  border: 1px solid ${props => props.theme.colors.border};
   /* Aus dem Theme, nicht fest verdrahtet — sonst laeuft die eine Karte
      wieder aus dem Raster, sobald der Token sich aendert. */
   border-radius: ${props => props.theme.borderRadius.lg};
-  padding: 1.6rem;
-  box-shadow: ${props => props.theme.shadows.md}, inset 0 1px 0 rgba(255, 255, 255, 0.045);
+  padding: 1.1rem 1.15rem;
+  box-shadow: none;
   transition: transform 220ms var(--md-spring, ease), box-shadow 260ms var(--md-emphasized, ease), border-color 260ms ease;
   transform-style: preserve-3d;
 
   &:hover {
-    border-color: ${props => props.theme.colors.border};
-    box-shadow: ${props => props.theme.shadows.lg}, inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    border-color: ${props => props.theme.colors.borderStrong};
   }
 `;
 
+/* Kleines Versal-Label ueber der grossen Zahl — die Kachel-Auszeichnung der
+   Referenz. Die Hierarchie traegt dort die Zahl, nicht die Ueberschrift. */
 const MetricTitle = styled.h3`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 16px;
-  font-size: 1.2rem;
-  font-weight: 600;
+  color: ${props => props.theme.colors.textSecondary};
+  margin-bottom: 0;
+  font-size: 0.76rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   display: flex;
   align-items: center;
   gap: 8px;
 `;
 
 const MetricValue = styled.div`
-  font-size: 2.6rem;
-  font-weight: 700;
+  font-size: clamp(1.65rem, 4vw, 2.25rem);
+  font-weight: 800;
   letter-spacing: -0.015em;
   line-height: 1.05;
+  margin-top: 0.4rem;
   color: ${props => props.color || props.theme.colors.primary};
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;   /* live digits don't jitter */
