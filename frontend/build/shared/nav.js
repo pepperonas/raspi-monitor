@@ -41,18 +41,20 @@
     return FALLBACK[name] || '';
   }
 
+  // `full` nur dort, wo das Badge-Wort eine Abkuerzung ist: in der Leiste zaehlt
+  // Kuerze, in der Fusszeile der richtige Name.
   var APPS = [
-    { href: '/',             icon: 'home',      label: 'Home' },
+    { href: '/',             icon: 'home',      label: 'Home',      full: 'Smart Home Dashboard' },
     { href: '/app/hue/',     icon: 'hue',       label: 'Hue' },
-    { href: '/app/licht/',   icon: 'lichtwerk', label: 'Lichtwerk' },
+    { href: '/app/licht/',   icon: 'lichtwerk', label: 'Lichtwerk', full: 'Lichtwerk' },
     { href: '/app/disco/',   icon: 'disco',     label: 'Disco' },
-    { href: '/app/disco/stats', icon: 'db',     label: 'dB' },
+    { href: '/app/disco/stats', icon: 'db',     label: 'dB',        full: 'dB-Analyse' },
     { href: '/app/yamaha/',  icon: 'yamaha',    label: 'Yamaha' },
-    { href: '/app/hifi/',    icon: 'hifi',      label: 'PowerHiFi' },
+    { href: '/app/hifi/',    icon: 'hifi',      label: 'PowerHiFi', full: 'Teufel Power HiFi' },
     { href: '/app/fog/',     icon: 'fog',       label: 'Fog' },
-    { href: '/app/klima/',   icon: 'klima',     label: 'Klima' },
-    { href: '/app/garten/',  icon: 'garten',    label: 'Garten' },
-    { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor' }
+    { href: '/app/klima/',   icon: 'klima',     label: 'Klima',     full: 'Raumklima' },
+    { href: '/app/garten/',  icon: 'garten',    label: 'Garten',    full: 'Gartenklima' },
+    { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor',   full: 'Raspi Monitor' }
   ];
 
   var css = ''
@@ -114,6 +116,29 @@
     + '#sh-themebtn:active{transform:scale(.93)}'
     + '#sh-themebtn:focus-visible{outline:2px solid #b3c5ff;outline-offset:3px}'
     + '@media(prefers-reduced-motion:reduce){#sh-themebtn{transition:none}}'
+
+    /* ---- Fusszeile ---------------------------------------------------------
+       Sechs Apps hatten eine, fuenf keine, und die sechs unterschieden sich in
+       Schriftgroesse (12/14/16 px), Farbe, Polster und Rahmen. Jetzt eine
+       Fassung an einem Ort. Masse in px, wie die ganze Leiste: rem skaliert je
+       App-Wurzelgroesse unterschiedlich. */
+    + '#sh-footer{box-sizing:border-box;width:100%;max-width:1200px;margin:56px auto 0;'
+    + 'padding:18px 0 28px;border-top:1px solid #2b2d35;'
+    + 'color:#8e9099;font:400 12px/1.6 "Roboto Flex",Roboto,system-ui,-apple-system,sans-serif;'
+    + 'text-align:center}'
+    + '#sh-footer .sep{opacity:.45;margin:0 6px}'
+    + '#sh-footer a{color:inherit;text-decoration:none;border-bottom:1px solid #44464f;'
+    + 'padding-bottom:1px;transition:color .18s ease,border-color .18s ease}'
+    + '@media(hover:hover){#sh-footer a:hover{color:#b3c5ff;border-bottom-color:#b3c5ff}}'
+    + '#sh-footer a:focus-visible{outline:2px solid #b3c5ff;outline-offset:3px;border-radius:2px}'
+    /* Auf schmalen Breiten bricht die Zeile an den Trennern statt mitten im
+       Namen — die Teile bleiben so als Einheiten lesbar. */
+    + '#sh-footer .part{display:inline-block;white-space:nowrap}'
+    + '[data-theme="light"] #sh-footer{border-top-color:#d7dae2;color:#6d7079}'
+    + '[data-theme="light"] #sh-footer a{border-bottom-color:#c9ccd6}'
+    + '@media(hover:hover){[data-theme="light"] #sh-footer a:hover{color:#2f5bd0;border-bottom-color:#2f5bd0}}'
+    + '@media(max-width:520px){#sh-footer{margin-top:40px;padding:16px 0 24px}'
+    + '#sh-footer .sep{margin:0 4px}}'
 
     + '@view-transition{navigation:auto}'
     + '#sh-appnav{view-transition-name:sh-appnav}'
@@ -251,6 +276,40 @@
     });
   }
 
+  /* Der Disco-Visualizer bekommt keine: er ist bildschirmfuellend, der body
+     hat `overflow:hidden`, es gibt dort schlicht keinen Seitenfuss. Die
+     dB-Analyse unter /app/disco/stats ist eine normale Seite und bekommt eine. */
+  function willFooter() {
+    return !/^\/app\/disco\/?$/.test(location.pathname);
+  }
+
+  function buildFooter() {
+    if (document.getElementById('sh-footer')) return null;
+    var f = document.createElement('footer');
+    f.id = 'sh-footer';
+
+    var app = bestIdx >= 0 ? APPS[bestIdx] : null;
+    var name = app ? (app.full || app.label) : document.title;
+    var teile = [
+      name,
+      location.hostname,
+      '\u00a9 ' + new Date().getFullYear() + ' Martin Pfeffer'
+    ];
+    var html = teile.map(function (t) {
+      return '<span class="part">' + escapeHtml(t) + '</span>';
+    }).join('<span class="sep" aria-hidden="true">\u00b7</span>');
+    html += '<span class="sep" aria-hidden="true">\u00b7</span>'
+          + '<span class="part"><a href="https://celox.io" target="_blank" rel="noopener">celox.io</a></span>';
+    f.innerHTML = html;
+    return f;
+  }
+
+  function escapeHtml(t) {
+    return String(t).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
   function mount() {
     if (!document.body) return;
     document.body.appendChild(nav);
@@ -280,6 +339,11 @@
     // Damit Apps ihren Inhalt unter der Leiste ausrichten koennen, ohne sie
     // selbst nachzumessen (der Disco-Canvas braucht das, der Monitor auch).
     document.documentElement.style.setProperty('--sh-nav-h', nav.offsetHeight + 'px');
+
+    if (willFooter()) {
+      var ft = buildFooter();
+      if (ft) document.body.appendChild(ft);
+    }
     // Spacer in Leistenhöhe an den Body-Anfang, damit kein Inhalt unter der
     // fixed Bar verschwindet (Höhe nachgemessen, nicht hart kodiert).
     var spacer = document.createElement('div');

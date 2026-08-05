@@ -140,15 +140,6 @@ const ContentArea = styled.div`
   overflow-y: auto;
 `;
 
-const Footer = styled.footer`
-  text-align: center;
-  padding: 20px;
-  color: ${props => props.theme.colors.textSecondary};
-  font-size: 14px;
-  border-top: 1px solid ${props => props.theme.colors.border};
-  background-color: ${props => props.theme.colors.surface};
-`;
-
 // React Query client
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -282,9 +273,6 @@ function App() {
                   wsService={wsService}
                 />
               </ContentArea>
-              <Footer>
-                Made with <Icon name="heart" title="love" /> by Martin Pfeffer
-              </Footer>
             </MainContent>
           </AppContainer>
         </Router>
