@@ -123,7 +123,7 @@
        Fassung an einem Ort. Masse in px, wie die ganze Leiste: rem skaliert je
        App-Wurzelgroesse unterschiedlich. */
     + '#sh-footer{box-sizing:border-box;width:100%;max-width:1200px;margin:56px auto 0;'
-    + 'padding:18px 0 28px;border-top:1px solid #2b2d35;'
+    + 'padding:24px 0;border-top:1px solid #2b2d35;'
     + 'color:#8e9099;font:400 12px/1.6 "Roboto Flex",Roboto,system-ui,-apple-system,sans-serif;'
     + 'text-align:center}'
     + '#sh-footer .sep{opacity:.45;margin:0 6px}'
@@ -137,7 +137,7 @@
     + '[data-theme="light"] #sh-footer{border-top-color:#d7dae2;color:#6d7079}'
     + '[data-theme="light"] #sh-footer a{border-bottom-color:#c9ccd6}'
     + '@media(hover:hover){[data-theme="light"] #sh-footer a:hover{color:#2f5bd0;border-bottom-color:#2f5bd0}}'
-    + '@media(max-width:520px){#sh-footer{margin-top:40px;padding:16px 0 24px}'
+    + '@media(max-width:520px){#sh-footer{margin-top:40px;padding:20px 0}'
     + '#sh-footer .sep{margin:0 4px}}'
 
     + '@view-transition{navigation:auto}'
@@ -342,7 +342,15 @@
 
     if (willFooter()) {
       var ft = buildFooter();
-      if (ft) document.body.appendChild(ft);
+      if (ft) {
+        document.body.appendChild(ft);
+        // Der body bringt aus shared/theme.css ein Unterpolster mit (56 px),
+        // damit Inhalt nicht bündig am Fensterrand endet. Mit einer Fusszeile
+        // IST sie das Seitenende und bringt ihren Platz selbst mit — beides
+        // zusammen ergab 84 px unter dem Text gegen 19 px darueber, der Satz
+        // sass also sichtbar zu hoch in seinem Feld.
+        document.body.style.paddingBottom = '0';
+      }
     }
     // Spacer in Leistenhöhe an den Body-Anfang, damit kein Inhalt unter der
     // fixed Bar verschwindet (Höhe nachgemessen, nicht hart kodiert).
