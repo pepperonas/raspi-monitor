@@ -11,13 +11,6 @@ const TasksContainer = styled.div`
   margin: 0 auto;
 `;
 
-const PageTitle = styled.h1`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  font-weight: 300;
-`;
-
 const ProcessesSection = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
@@ -243,7 +236,6 @@ const Tasks = () => {
 
   return (
     <TasksContainer>
-      <PageTitle>Running Tasks</PageTitle>
       
       <StatsRow>
         <StatCard>

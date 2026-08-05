@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Icon from '../Icon';
 import styled from 'styled-components';
 
@@ -27,35 +27,27 @@ const HeaderContainer = styled.header`
 
 const LeftSection = styled.div`
   display: flex;
-  align-items: center;
-  gap: 16px;
+  flex-direction: column;
+  min-width: 0;
 `;
 
-const MenuButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 0.5rem;
-  color: ${props => props.theme.colors.text};
-  font-size: 1.2rem;
-  
-  &:hover {
-    background: ${props => props.theme.colors.background};
-  }
-`;
-
-/* Diese Zeile traegt den GERAETENAMEN, nicht den Seitentitel — der steht
-   darunter ("Dashboard", "System", ...) und ist das Gegenstueck zum h1 der
-   uebrigen Apps. Sie auf dessen Mass zu bringen war ein Fehlgriff: dann standen
-   zwei 40-px-Ueberschriften uebereinander. Sie bleibt klein und uebernimmt nur
-   Gewicht und Tracking, damit beide erkennbar aus derselben Schrift kommen. */
+/* Seitenkopf wie in jeder anderen App: App-Name als h1, darunter ein
+   Untertitel. Welche Unterseite offen ist, sagt der aktive Reiter — vorher
+   standen hier zwei Ueberschriften uebereinander (Geraetename klein,
+   Seitenname gross), was es sonst nirgends im Stack gibt. */
 const Title = styled.h1`
   color: ${props => props.theme.colors.text};
-  font-size: 1.25rem;
-  font-weight: 750;
-  letter-spacing: -0.01em;
+  font-size: clamp(1.85rem, 5vw, 2.55rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
   margin: 0;
+`;
+
+const Subtitle = styled.div`
+  color: ${props => props.theme.colors.textSecondary};
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
 `;
 
 const RightSection = styled.div`
@@ -123,26 +115,36 @@ const AlertsCount = styled.div`
   display: ${props => props.count > 0 ? 'block' : 'none'};
 `;
 
-const Header = ({ 
-  isDarkMode, 
-  onToggleTheme, 
-  isConnected, 
-  onToggleSidebar,
+const Header = ({
+  isConnected,
   alerts = []
 }) => {
-  // Same build runs on both Pis; the Pi 5 monitor is only ever reached at its own
-  // host (192.168.178.105:4999). Everything else (nginx /app/monitor/, raspi3) = Pi 3.
-  const piModel = (typeof window !== 'undefined' && window.location.host.includes('192.168.178.105')) ? '5' : '3';
+  // Das Board sagt selbst, was es ist (/api/system/info -> /proc/device-tree/model).
+  // Vorher wurde das aus dem Hostnamen abgeleitet, unter dem die Seite
+  // ausgeliefert wurde: ueber die Domain stand dort "Raspberry Pi 3 Monitor",
+  // waehrend daneben 8 GB RAM und eine Luefterdrehzahl angezeigt wurden —
+  // eine Vermutung ueber den Host, ausgegeben als Tatsache ueber die Hardware.
+  const [modell, setModell] = useState('');
+  useEffect(() => {
+    let abgebrochen = false;
+    fetch('api/system/info')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (!abgebrochen && d && d.model) setModell(d.model); })
+      .catch(() => {});
+    return () => { abgebrochen = true; };
+  }, []);
+  // Aus "Raspberry Pi 5 Model B Rev 1.0" wird "Raspberry Pi 5" — die Revision
+  // gehoert auf die System-Seite, nicht in den Kopf.
+  const kurz = (modell.match(/^Raspberry Pi\s*\w+/) || [])[0] || modell;
+
   return (
     <HeaderContainer>
       <LeftSection>
-        <Title>Raspberry Pi {piModel} Monitor</Title>
+        <Title>Raspi Monitor</Title>
+        <Subtitle>{kurz ? `${kurz} · CPU, RAM, Temperatur` : 'CPU, RAM, Temperatur'}</Subtitle>
       </LeftSection>
-      
+
       <RightSection>
-        <MenuButton onClick={onToggleSidebar} aria-label="Navigation ein-/ausblenden">
-          <Icon name="menu" />
-        </MenuButton>
         <StatusIndicator>
           <StatusDot connected={isConnected} />
           {isConnected ? 'live' : 'offline'}

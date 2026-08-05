@@ -32,14 +32,6 @@ const ChartsContainer = styled.div`
   margin: 0 auto;
 `;
 
-const PageTitle = styled.h1`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 24px;
-  font-size: 2.2rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-`;
-
 const ChartsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(440px, 1fr));
@@ -223,7 +215,6 @@ const Charts = ({ isConnected = false }) => {
   if (!isConnected) {
     return (
       <ChartsContainer>
-        <PageTitle>System Charts</PageTitle>
         <div style={{ textAlign: 'center', color: '#ff8a80', marginTop: 40, padding: 40, background: 'rgba(225,97,98,0.1)', borderRadius: 28, border: '1px solid rgba(225,97,98,0.2)' }}>
           <h3 style={{ marginBottom: 16, color: '#ff8a80' }}><Icon name="warning" /> Nicht verbunden</h3>
           <p style={{ color: '#8e9099' }}>Keine Diagrammdaten verfügbar</p>
@@ -241,7 +232,6 @@ const Charts = ({ isConnected = false }) => {
 
   return (
     <ChartsContainer>
-      <PageTitle>System Charts</PageTitle>
 
       <TimeRangeSelector>
         <span>Zeitbereich:</span>

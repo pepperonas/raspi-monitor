@@ -7,7 +7,7 @@ import styled, { ThemeProvider, createGlobalStyle } from 'styled-components';
 
 // Components
 import Header from './components/Layout/Header';
-import Sidebar from './components/Layout/Sidebar';
+import PageTabs from './components/Layout/PageTabs';
 import Dashboard from './pages/Dashboard';
 import Metrics from './pages/Metrics';
 import Charts from './pages/Charts';
@@ -115,15 +115,17 @@ const MainContent = styled.main`
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 0 17.6px;   /* seitliches Polster wie am body des Massstabs */
+  /* Kein eigenes seitliches Polster: seit die App shared/theme.css laedt,
+     bringt der body es mit (17,6 px). Beides zusammen ergab 35,2 px je Seite
+     und damit 1197,6 statt 1200 Satzspiegel — dieselbe Doppelung wie beim
+     Kopfabstand, nur waagerecht. */
   box-sizing: border-box;
-  margin-left: ${props => props.sidebarOpen ? '280px' : '60px'};
-  transition: margin-left 0.3s ease;
+  /* Ohne min-width:0 schrumpft ein Flex-Kind nicht unter seine Inhaltsbreite
+     (Default min-width:auto). Auf 390 px stand MAIN dadurch 518 px breit —
+     157 px Ueberlauf, und die Reiterreihe konnte nicht scrollen, weil ihr
+     Elternteil selbst zu breit war. */
+  min-width: 0;
   min-height: 100vh;
-  
-  @media (max-width: 1024px) {
-    margin-left: 0;
-  }
 `;
 
 const ContentArea = styled.div`
@@ -197,11 +199,6 @@ function App() {
     return () => window.removeEventListener('sh-theme', onTheme);
   }, []);
 
-  const [sidebarOpen, setSidebarOpen] = useState(() => {
-    const saved = localStorage.getItem('sidebarOpen');
-    const isMobile = window.innerWidth <= 1024;
-    return saved ? JSON.parse(saved) : !isMobile;
-  });
 
   const [isConnected, setIsConnected] = useState(false);
   const [metrics, setMetrics] = useState({});
@@ -248,23 +245,7 @@ function App() {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
-  useEffect(() => {
-    localStorage.setItem('sidebarOpen', JSON.stringify(sidebarOpen));
-  }, [sidebarOpen]);
 
-  // Offset our fixed sidebar below the shared app-switcher nav (nav.js injects
-  // #sh-appnav fixed at top:0, z-index above ours). Accessed directly on a Pi
-  // (no nginx -> no nav.js), #sh-appnav is absent and --sh-nav-h stays 0.
-  useEffect(() => {
-    const apply = () => {
-      const nav = document.getElementById('sh-appnav');
-      document.documentElement.style.setProperty('--sh-nav-h', (nav ? nav.offsetHeight : 0) + 'px');
-    };
-    apply();
-    const timers = [setTimeout(apply, 200), setTimeout(apply, 800), setTimeout(apply, 1600)];
-    window.addEventListener('resize', apply);
-    return () => { timers.forEach(clearTimeout); window.removeEventListener('resize', apply); };
-  }, []);
 
   // Umgeschaltet wird ausschliesslich ueber den Knopf in der geteilten Leiste
   // — sonst gaebe es auf einem Bildschirm zwei Bedienelemente fuer dieselbe
@@ -276,9 +257,6 @@ function App() {
     document.documentElement.setAttribute('data-theme', next);
   };
 
-  const toggleSidebar = () => {
-    setSidebarOpen(prev => !prev);
-  };
 
   const theme = isDarkMode ? darkTheme : lightTheme;
 
@@ -288,19 +266,13 @@ function App() {
         <GlobalStyle />
         <Router>
           <AppContainer>
-            <Sidebar 
-              isOpen={sidebarOpen}
-              onToggle={toggleSidebar}
-            />
-            <MainContent sidebarOpen={sidebarOpen}>
+            <MainContent>
               <Header
-                isDarkMode={isDarkMode}
-                onToggleTheme={toggleTheme}
                 isConnected={isConnected}
-                onToggleSidebar={toggleSidebar}
                 alerts={alerts}
               />
               <ContentArea>
+                <PageTabs />
                 <AppRoutes
                   metrics={metrics}
                   alerts={alerts}

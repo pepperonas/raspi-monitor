@@ -12,13 +12,6 @@ const MetricsContainer = styled.div`
   margin: 0 auto;
 `;
 
-const PageTitle = styled.h1`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  font-weight: 300;
-`;
-
 const ChartContainer = styled.div`
   background: ${props => props.theme.colors.surface};
   border: 1px solid ${props => props.theme.colors.border};
@@ -167,7 +160,6 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
   if (loading && Object.keys(currentMetrics).length === 0) {
     return (
       <MetricsContainer>
-        <PageTitle>Metrics</PageTitle>
         <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
           Loading metrics...
         </div>
@@ -177,7 +169,6 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
 
   return (
     <MetricsContainer>
-      <PageTitle>Metrics</PageTitle>
       
       {/* CPU Temperature */}
       <ChartContainer>

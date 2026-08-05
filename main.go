@@ -511,12 +511,26 @@ func hUptime(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// boardModel reports the board as the device tree names it, e.g.
+// "Raspberry Pi 5 Model B Rev 1.0". The frontend used to derive this from the
+// hostname it was served under, which said "Pi 3" whenever the page was opened
+// through the domain instead of the IP — a guess about the host dressed up as
+// a fact about the hardware. The machine knows; ask it.
+func boardModel() string {
+	b, err := os.ReadFile("/proc/device-tree/model")
+	if err != nil {
+		return ""
+	}
+	return strings.TrimRight(string(b), "\x00\n ")
+}
+
 func hSysInfo(w http.ResponseWriter, r *http.Request) {
 	hi, _ := host.Info()
 	writeJSON(w, 200, map[string]any{
 		"hostname": hi.Hostname, "os": hi.OS, "platform": hi.Platform,
 		"platform_version": hi.PlatformVersion, "kernel": hi.KernelVersion,
 		"arch": hi.KernelArch, "uptime_seconds": hi.Uptime,
+		"model": boardModel(),
 	})
 }
 

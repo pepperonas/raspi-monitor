@@ -12,19 +12,6 @@ const DashboardContainer = styled.div`
   margin: 0 auto;
 `;
 
-const PageTitle = styled.h1`
-  /* Wie die Referenz: eine Groesse, ein Gewicht, keine Verlaufsfuellung.
-     Der Farbverlauf im Text war das einzige Display-Element im Stack, das
-     die Ueberschrift zur Grafik machte statt zur Ueberschrift. */
-  margin-bottom: 8px;
-  font-size: clamp(1.85rem, 5vw, 2.55rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  color: ${props => props.theme.colors.text};
-  width: fit-content;
-`;
-
 const MetricsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -253,7 +240,6 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
   if (loading && Object.keys(currentMetrics).length === 0) {
     return (
       <DashboardContainer>
-        <PageTitle>Dashboard</PageTitle>
         <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
           Loading metrics...
         </div>
@@ -263,7 +249,6 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
 
   return (
     <DashboardContainer>
-      <PageTitle>Dashboard</PageTitle>
       
       <ConnectionStatus>
         <StatusIndicator connected={isConnected} />

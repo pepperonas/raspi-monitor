@@ -12,13 +12,6 @@ const AlertsContainer = styled.div`
   margin: 0 auto;
 `;
 
-const PageTitle = styled.h1`
-  color: ${props => props.theme.colors.text};
-  margin-bottom: 30px;
-  font-size: 2.5rem;
-  font-weight: 300;
-`;
-
 const AlertsList = styled.div`
   display: flex;
   flex-direction: column;
@@ -118,7 +111,6 @@ const Alerts = ({ alerts = [], isConnected = false }) => {
   if (loading && currentAlerts.length === 0) {
     return (
       <AlertsContainer>
-        <PageTitle>Alerts</PageTitle>
         <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>
           Loading alerts...
         </div>
@@ -133,7 +125,6 @@ const Alerts = ({ alerts = [], isConnected = false }) => {
   if (currentAlerts.length === 0) {
     return (
       <AlertsContainer>
-        <PageTitle>Alerts</PageTitle>
         <NoAlerts>
           <Icon name="check" /> No alerts to display
         </NoAlerts>
@@ -143,7 +134,6 @@ const Alerts = ({ alerts = [], isConnected = false }) => {
 
   return (
     <AlertsContainer>
-      <PageTitle>Alerts</PageTitle>
       <AlertsList>
         {currentAlerts.map((alert, index) => (
           <AlertItem key={index} severity={alert.severity}>

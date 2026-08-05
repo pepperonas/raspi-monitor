@@ -4,13 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script>
-      // Pi5 = .105; everything else (Pi3 direct, nginx /app/monitor/, home.celox.io) = Monitor 3
+      // Es gibt nur noch EINEN Monitor, und er laeuft auf dem Pi 5. Frueher
+      // stand hier eine Ableitung aus dem Hostnamen — die ergab ueber die
+      // Domain "Monitor 3", waehrend die Seite Pi-5-Werte anzeigte. Was fuer
+      // Hardware das ist, sagt jetzt das Board selbst (/api/system/info);
+      // der Fenstertitel braucht diese Unterscheidung gar nicht.
       (function () {
-        var n = location.hostname === "192.168.178.105" ? "5" : "3";
-        window.__MON_N = n;
         var v = "20260731m";
         var base = "%PUBLIC_URL%";
-        document.title = "Monitor " + n + " · Raspberry Pi";
+        document.title = "Raspi Monitor";
         document.write(
           '' +
           '' +
@@ -34,14 +36,13 @@
     <meta name="color-scheme" content="dark">
     <meta name="msapplication-TileColor" content="#0E1116">
 
-    <!-- Fallbacks if script blocked (Monitor 3 defaults) -->
+    <!-- Fallback, falls das Script blockiert wird -->
 <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
     <script>
-      // Sync apple title + manifest name to Monitor 3/5 after parse
+      // Home-Screen-Name gleichziehen (ein Monitor, ein Name).
       document.addEventListener("DOMContentLoaded", function () {
-        var n = window.__MON_N || "3";
-        var t = "Monitor " + n;
+        var t = "Raspi Monitor";
         var m = document.querySelector('meta[name="apple-mobile-web-app-title"]');
         if (!m) {
           m = document.createElement("meta");
