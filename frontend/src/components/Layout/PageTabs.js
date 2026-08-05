@@ -13,8 +13,18 @@ const Row = styled.nav`
   display: flex;
   gap: 0.4rem;
   align-items: center;
-  margin: 0.9rem 0 1rem;
+  /* overflow-x:auto zwingt overflow-y ebenfalls auf auto — die Zeile wird
+     damit zur Scroll-Box und klippt AUCH senkrecht. Die 44-px-Trefferflaeche
+     der Chips (::after) ragt ueber deren 27 px hinaus; ohne dieses Polster
+     schnitt die Zeile sie ab und nahm die Pillen-Kontur gleich mit
+     (clientHeight 27 gegen scrollHeight 35). Der Aussenabstand ist um dasselbe
+     Mass verringert, damit der sichtbare Abstand gleich bleibt.
+     Keine Backticks in Kommentaren innerhalb eines Template-Literals: sie
+     beenden es. */
+  padding: 9px 0;
+  margin: 0.35rem 0 0.45rem;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scrollbar-width: none;
   &::-webkit-scrollbar { display: none; }
 `;
