@@ -370,24 +370,33 @@ func readFanStatus() map[string]any {
 // null: DAS war das leere "Network I/O (Empfang)". Nur [A-Za-z0-9._-] kommt
 // zurueck (der Name wandert in rohes SQL).
 func primaryIface() string {
-	rows, err := queryRows("SELECT interface_name, bytes_recv FROM network_metrics WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL 60 SECOND)")
+	// AKTIVITAET entscheidet (MAX-MIN im Fenster), nicht der kumulative
+	// Zaehlerstand: ein totes eth0 traegt seinen Lebens-Gesamtzaehler ewig
+	// weiter und wuerde per MAX(bytes_recv) fuer immer gewinnen, auch wenn
+	// laengst wlan0 den Verkehr traegt. Rueckfall auf den Zaehlerstand nur,
+	// wenn im Fenster ueberall Stille herrscht.
+	rows, err := queryRows("SELECT interface_name, MAX(bytes_recv)-MIN(bytes_recv) AS akt, MAX(bytes_recv) AS kum FROM network_metrics WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL 60 SECOND) GROUP BY interface_name")
 	if err != nil {
 		return ""
 	}
-	best, bestV := "", int64(-1)
+	toI := func(x any) int64 {
+		switch v := x.(type) {
+		case int64:
+			return v
+		case string:
+			n, _ := strconv.ParseInt(v, 10, 64)
+			return n
+		case float64:
+			return int64(v)
+		}
+		return 0
+	}
+	best, bestAkt, bestKum := "", int64(-1), int64(-1)
 	for _, r := range rows {
 		name, _ := r["interface_name"].(string)
-		var v int64
-		switch x := r["bytes_recv"].(type) {
-		case int64:
-			v = x
-		case string:
-			v, _ = strconv.ParseInt(x, 10, 64)
-		case float64:
-			v = int64(x)
-		}
-		if v > bestV {
-			best, bestV = name, v
+		akt, kum := toI(r["akt"]), toI(r["kum"])
+		if akt > bestAkt || (akt == bestAkt && kum > bestKum) {
+			best, bestAkt, bestKum = name, akt, kum
 		}
 	}
 	return regexp.MustCompile(`[^A-Za-z0-9._-]`).ReplaceAllString(best, "")
@@ -458,6 +467,39 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 	// whole range. Rows are inserted at a fixed interval, so even id-spacing ≈
 	// even time-spacing.
 	const targetPoints = 200
+	// Gefilterte Serien (Interface!) sampeln per Fensterfunktion IN der
+	// gefilterten Menge (gemessen: 7d/118k Zeilen -> 202 Punkte in 166 ms).
+	// Das ID-Stepping darf hier nie wieder ran: bei einer Zeile pro Interface
+	// und Tick haengt die Trefferparitaet an der Insert-Reihenfolge, und EINE
+	// uebersprungene Zeile kippt sie fuer den Rest des Fensters — genau so
+	// starb der Chart-Schwanz eine halbe Stunde vor "jetzt".
+	seriesFiltered := func(table, col, where string) []map[string]any {
+		out := []map[string]any{}
+		q := fmt.Sprintf(`SELECT timestamp, v FROM (
+			SELECT timestamp, %s AS v,
+			       ROW_NUMBER() OVER (ORDER BY id) rn, COUNT(*) OVER () cnt
+			FROM %s
+			WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL %d SECOND)%s
+		) t WHERE rn = cnt OR (rn - 1) %% GREATEST(1, cnt DIV %d) = 0 ORDER BY rn`,
+			col, table, secs, where, targetPoints)
+		rows, err := queryRows(q)
+		if err != nil {
+			return out
+		}
+		for _, row := range rows {
+			val := 0.0
+			switch x := row["v"].(type) {
+			case string:
+				val, _ = strconv.ParseFloat(x, 64)
+			case int64:
+				val = float64(x)
+			case float64:
+				val = x
+			}
+			out = append(out, map[string]any{"timestamp": row["timestamp"], "value": val})
+		}
+		return out
+	}
 	seriesW := func(table, col, where string) []map[string]any {
 		out := []map[string]any{}
 		var lo, hi sql.NullInt64
@@ -508,7 +550,7 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 			"cpu":         series("cpu_metrics", "cpu_usage_percent"),
 			"memory":      series("memory_metrics", "usage_percent"),
 			"temperature": series("cpu_metrics", "cpu_temp_celsius"),
-			"network":     seriesW("network_metrics", "bytes_recv", netWhere),
+			"network":     seriesFiltered("network_metrics", "bytes_recv", netWhere),
 			"fan":         series("fan_metrics", "rpm"),
 		},
 	})
