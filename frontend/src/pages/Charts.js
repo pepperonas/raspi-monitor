@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../components/Icon';
+import FanIndicator from '../components/FanIndicator';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 import {
@@ -23,7 +24,7 @@ const humanRate = (bps) => {
 
 // Reihenfarben: unterscheiden Messreihen voneinander, das ist Information.
 // Sie stammen aber aus der Palette, damit es nicht eine dritte gibt.
-const ACCENT = { cpu: '#7ddfa6', memory: '#b3c5ff', temperature: '#f5a04a', network: '#c9b8ff' };
+const ACCENT = { cpu: '#7ddfa6', memory: '#b3c5ff', temperature: '#f5a04a', network: '#c9b8ff', fan: '#6ec8d6' };
 
 const ChartsContainer = styled.div`
   /* Wie die uebrigen Seiten: kein eigenes Polster, das sitzt aussen. */
@@ -126,9 +127,29 @@ const TimeButton = styled.button`
   &:hover { background: ${props => props.active ? props.theme.colors.primary : 'rgba(179,197,255,0.12)'}; }
 `;
 
+const RANGES = ['1h', '6h', '24h', '7d'];
+const RANGE_KEY = 'mon-charts-range';
+
 const Charts = ({ isConnected = false }) => {
-  const [timeRange, setTimeRange] = useState('1h');
+  // Zeitbereich ueberlebt den Refresh (2026-08-07) — gleiche Konvention wie
+  // die Dashboard-Chips (localStorage, validiert gegen die bekannte Liste).
+  const [timeRange, setTimeRangeState] = useState(() => {
+    try {
+      const v = localStorage.getItem(RANGE_KEY);
+      return RANGES.includes(v) ? v : '1h';
+    } catch (_) { return '1h'; }
+  });
+  const setTimeRange = (r) => {
+    try { localStorage.setItem(RANGE_KEY, r); } catch (_) {}
+    setTimeRangeState(r);
+  };
   const [chartData, setChartData] = useState([]);
+  // Charts animieren NUR beim Erstaufbau (2026-08-07): recharts animiert
+  // sonst bei jedem 5-s-Poll neu — staendiges Nachzeichnen liest sich als
+  // Flackern, nicht als Live-Daten. Nach dem ersten Datensatz ist Schluss;
+  // auch ein Bereichswechsel zeichnet ohne Einflug (nur am Anfang, woertlich).
+  const [drawIn, setDrawIn] = useState(true);
+  const drawInDone = React.useRef(false);
 
   useEffect(() => {
     if (!isConnected) { setChartData([]); return; }
@@ -144,11 +165,11 @@ const Charts = ({ isConnected = false }) => {
       try {
         const data = await apiRequest(`/api/metrics/charts?range=${timeRange}`);
         const d = data.data || {};
-        const maxLength = Math.max(d.cpu?.length || 0, d.memory?.length || 0, d.temperature?.length || 0, d.network?.length || 0);
+        const maxLength = Math.max(d.cpu?.length || 0, d.memory?.length || 0, d.temperature?.length || 0, d.network?.length || 0, d.fan?.length || 0);
 
         const pts = [];
         for (let i = 0; i < maxLength; i++) {
-          const ts = d.cpu?.[i]?.timestamp || d.memory?.[i]?.timestamp || d.temperature?.[i]?.timestamp || d.network?.[i]?.timestamp;
+          const ts = d.cpu?.[i]?.timestamp || d.memory?.[i]?.timestamp || d.temperature?.[i]?.timestamp || d.network?.[i]?.timestamp || d.fan?.[i]?.timestamp;
           if (!ts) continue;
           pts.push({
             fullTimestamp: ts,
@@ -157,6 +178,7 @@ const Charts = ({ isConnected = false }) => {
             memory: d.memory?.[i]?.value ?? null,
             temperature: d.temperature?.[i]?.value ?? null,
             netRaw: d.network?.[i]?.value ?? null,   // cumulative bytes_recv
+            fan: d.fan?.[i]?.value ?? null,
           });
         }
         pts.sort((a, b) => a.t - b.t);
@@ -172,6 +194,10 @@ const Charts = ({ isConnected = false }) => {
           pts[i].timestamp = labelFor(new Date(pts[i].fullTimestamp), timeRange);
         }
         setChartData(pts);
+        if (!drawInDone.current && pts.length) {
+          drawInDone.current = true;
+          setTimeout(() => setDrawIn(false), 1400);   // Einzeichnen zu Ende laufen lassen
+        }
       } catch (e) {
         console.error('Failed to fetch chart data:', e);
         setChartData([]);
@@ -186,6 +212,7 @@ const Charts = ({ isConnected = false }) => {
   const fmtVal = (key, v) => {
     if (v === null || v === undefined) return '--';
     if (key === 'network') return humanRate(v);
+    if (key === 'fan') return `${Math.round(v)} rpm`;
     if (key === 'temperature') return `${v.toFixed(1)} °C`;
     return `${v.toFixed(1)} %`;
   };
@@ -210,6 +237,7 @@ const Charts = ({ isConnected = false }) => {
     memory: last.memory != null ? last.memory.toFixed(1) : '--',
     temperature: last.temperature != null ? last.temperature.toFixed(1) : '--',
     network: humanRate(last.network),
+    fan: last.fan != null ? Math.round(last.fan) : null,
   };
 
   if (!isConnected) {
@@ -228,6 +256,7 @@ const Charts = ({ isConnected = false }) => {
     { key: 'memory', title: 'Memory Usage', domain: [0, 100], yfmt: (v) => `${v}%` },
     { key: 'temperature', title: 'Temperature', domain: ['dataMin - 5', 'dataMax + 5'], yfmt: (v) => `${v}°` },
     { key: 'network', title: 'Network I/O (Empfang)', domain: [0, 'auto'], yfmt: humanRate },
+    { key: 'fan', title: 'Fan Speed', domain: [0, 'auto'], yfmt: (v) => `${v}` },
   ];
 
   return (
@@ -235,7 +264,7 @@ const Charts = ({ isConnected = false }) => {
 
       <TimeRangeSelector>
         <span>Zeitbereich:</span>
-        {['1h', '6h', '24h', '7d'].map(range => (
+        {RANGES.map(range => (
           <TimeButton key={range} active={timeRange === range} onClick={() => setTimeRange(range)}>{range}</TimeButton>
         ))}
       </TimeRangeSelector>
@@ -245,6 +274,13 @@ const Charts = ({ isConnected = false }) => {
         <MetricCard><MetricValue color={ACCENT.memory}>{cur.memory}%</MetricValue><MetricLabel>Memory Usage</MetricLabel></MetricCard>
         <MetricCard><MetricValue color={ACCENT.temperature}>{cur.temperature}°C</MetricValue><MetricLabel>Temperature</MetricLabel></MetricCard>
         <MetricCard><MetricValue color={ACCENT.network}>{cur.network}</MetricValue><MetricLabel>Network I/O</MetricLabel></MetricCard>
+        <MetricCard>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }}>
+            <FanIndicator rpm={cur.fan || 0} pwm={null} size={40} color={ACCENT.fan} />
+            <MetricValue color={ACCENT.fan} style={{ marginBottom: 0 }}>{cur.fan != null ? cur.fan : '--'}</MetricValue>
+          </div>
+          <MetricLabel style={{ marginTop: 6 }}>Fan (rpm)</MetricLabel>
+        </MetricCard>
       </MetricsSummary>
 
       <ChartsGrid className="md-stagger">
@@ -258,7 +294,7 @@ const Charts = ({ isConnected = false }) => {
                   <XAxis dataKey="timestamp" tick={{ fontSize: 11 }} interval="preserveStartEnd" minTickGap={40} />
                   <YAxis tick={{ fontSize: 11 }} domain={c.domain} width={c.key === 'network' ? 64 : 40} tickFormatter={c.yfmt} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line type="monotone" dataKey={c.key} stroke={ACCENT[c.key]} strokeWidth={2.5} dot={false} name={c.title} connectNulls={false} />
+                  <Line type="monotone" dataKey={c.key} stroke={ACCENT[c.key]} strokeWidth={2.5} dot={false} name={c.title} connectNulls={false} isAnimationActive={drawIn} />
                 </LineChart>
               </ResponsiveContainer>
             </ChartWrapper>

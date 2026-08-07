@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Icon from '../components/Icon';
+import FanIndicator from '../components/FanIndicator';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
@@ -289,9 +290,17 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           <MetricTitle>
             <Icon name="fan" /> Fan Status
           </MetricTitle>
-          <MetricValue color={gpu.fan_status?.status === 'on' ? '#7ddfa6' : '#8e9099'}>
-            {gpu.fan_status?.description || 'Unknown'}
-          </MetricValue>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <FanIndicator
+              rpm={gpu.fan_status?.rpm || 0}
+              pwm={gpu.fan_status?.pwm ?? null}
+              size={46}
+              color={gpu.fan_status?.status === 'on' ? '#7ddfa6' : '#8e9099'}
+            />
+            <MetricValue color={gpu.fan_status?.status === 'on' ? '#7ddfa6' : '#8e9099'} style={{ marginBottom: 0 }}>
+              {gpu.fan_status?.description || 'Unknown'}
+            </MetricValue>
+          </div>
           <MetricSubtext>
             Level: {(gpu.fan_status && gpu.fan_status.level !== null) ? gpu.fan_status.level : '--'} • 
             Status: {gpu.fan_status?.status || 'unknown'}

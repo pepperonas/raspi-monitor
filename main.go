@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -193,6 +194,22 @@ func collectOnce() {
 		}
 	}
 
+	// Fan (2026-08-07): Verlauf fuer das Chart. Nur schreiben, wenn die
+	// Hardware wirklich berichtet — ein Pi ohne Luefter erzeugt keine Zeilen
+	// statt einer Null-Reihe, und das Chart zeigt ehrlich nichts.
+	if fs := readFanStatus(); fs["status"] != "unknown" {
+		rpmV, rpmOK := fs["rpm"].(int)
+		pwmV, pwmOK := fs["pwm"].(int)
+		lvl := -1
+		if l, ok := fs["level"].(int); ok {
+			lvl = l
+		}
+		if rpmOK || pwmOK {
+			db.Exec(`INSERT INTO fan_metrics (timestamp,rpm,pwm,level) VALUES (?,?,?,?)`,
+				now, ifElseInt(rpmOK, rpmV, -1), ifElseInt(pwmOK, pwmV, -1), lvl)
+		}
+	}
+
 	// GPU (no direct access on Pi → null, matches Node)
 	db.Exec(`INSERT INTO gpu_metrics (timestamp,gpu_temp_celsius,gpu_memory_used_bytes,gpu_memory_total_bytes,gpu_usage_percent) VALUES (?,NULL,NULL,NULL,NULL)`, now)
 
@@ -253,6 +270,13 @@ func readSysInt(p string) (int, bool) {
 		return 0, false
 	}
 	return n, true
+}
+
+func ifElseInt(c bool, a, b int) int {
+	if c {
+		return a
+	}
+	return b
 }
 
 func readFanStatus() map[string]any {
@@ -339,6 +363,36 @@ func readFanStatus() map[string]any {
 	return res
 }
 
+// primaryIface liefert das aktivste Interface der letzten Minute (max
+// bytes_recv). Der Collector schreibt EINE Zeile pro Interface und Tick;
+// latest()/series() ohne Filter mischten die Interfaces — der Client rechnete
+// Deltas zwischen wlan0- und eth0-Zaehlern, praktisch immer negativ, also
+// null: DAS war das leere "Network I/O (Empfang)". Nur [A-Za-z0-9._-] kommt
+// zurueck (der Name wandert in rohes SQL).
+func primaryIface() string {
+	rows, err := queryRows("SELECT interface_name, bytes_recv FROM network_metrics WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL 60 SECOND)")
+	if err != nil {
+		return ""
+	}
+	best, bestV := "", int64(-1)
+	for _, r := range rows {
+		name, _ := r["interface_name"].(string)
+		var v int64
+		switch x := r["bytes_recv"].(type) {
+		case int64:
+			v = x
+		case string:
+			v, _ = strconv.ParseInt(x, 10, 64)
+		case float64:
+			v = int64(x)
+		}
+		if v > bestV {
+			best, bestV = name, v
+		}
+	}
+	return regexp.MustCompile(`[^A-Za-z0-9._-]`).ReplaceAllString(best, "")
+}
+
 // ---- HTTP handlers ----------------------------------------------------------
 func hMetrics(w http.ResponseWriter, r *http.Request) {
 	wrap := func(m map[string]any) []any {
@@ -364,11 +418,26 @@ func hMetrics(w http.ResponseWriter, r *http.Request) {
 		"cpu":       wrap(cpuRow),
 		"memory":    wrap(latest("memory_metrics")),
 		"disk":      wrap(latest("disk_metrics")),
-		"network":   wrap(latest("network_metrics")),
+		"network":   wrap(latestIface()),
 		"processes": wrap(latest("process_metrics")),
 		"gpu":       wrap(gpuRow),
 		"timestamp": isoUTC(time.Now()),
 	})
+}
+
+// latestIface: juengste Zeile DES Primaer-Interfaces — latest() nahm die
+// juengste Zeile irgendeines Interfaces, und die Kennzahl auf der Metrics-
+// Seite sprang zwischen wlan0 und eth0 hin und her.
+func latestIface() map[string]any {
+	ifc := primaryIface()
+	if ifc == "" {
+		return latest("network_metrics")
+	}
+	rows, err := queryRows("SELECT * FROM network_metrics WHERE interface_name = '" + ifc + "' ORDER BY id DESC LIMIT 1")
+	if err != nil || len(rows) == 0 {
+		return latest("network_metrics")
+	}
+	return rows[0]
 }
 
 func hCharts(w http.ResponseWriter, r *http.Request) {
@@ -389,11 +458,11 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 	// whole range. Rows are inserted at a fixed interval, so even id-spacing ≈
 	// even time-spacing.
 	const targetPoints = 200
-	series := func(table, col string) []map[string]any {
+	seriesW := func(table, col, where string) []map[string]any {
 		out := []map[string]any{}
 		var lo, hi sql.NullInt64
 		// first id in the window (uses the timestamp index) + latest id (instant)
-		db.QueryRow(fmt.Sprintf("SELECT id FROM %s WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL %d SECOND) ORDER BY timestamp ASC LIMIT 1", table, secs)).Scan(&lo)
+		db.QueryRow(fmt.Sprintf("SELECT id FROM %s WHERE timestamp >= (UTC_TIMESTAMP() - INTERVAL %d SECOND)%s ORDER BY timestamp ASC LIMIT 1", table, secs, where)).Scan(&lo)
 		db.QueryRow(fmt.Sprintf("SELECT MAX(id) FROM %s", table)).Scan(&hi)
 		if !lo.Valid || !hi.Valid || hi.Int64 <= lo.Int64 {
 			return out
@@ -409,7 +478,7 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 			}
 			sb.WriteString(strconv.FormatInt(id, 10))
 		}
-		q := fmt.Sprintf("SELECT timestamp, %s AS v FROM %s WHERE id IN (%s) ORDER BY id ASC", col, table, sb.String())
+		q := fmt.Sprintf("SELECT timestamp, %s AS v FROM %s WHERE id IN (%s)%s ORDER BY id ASC", col, table, sb.String(), where)
 		rows, err := queryRows(q)
 		if err != nil {
 			return out
@@ -428,13 +497,19 @@ func hCharts(w http.ResponseWriter, r *http.Request) {
 		}
 		return out
 	}
+	series := func(table, col string) []map[string]any { return seriesW(table, col, "") }
+	netWhere := ""
+	if ifc := primaryIface(); ifc != "" {
+		netWhere = " AND interface_name = '" + ifc + "'"
+	}
 	writeJSON(w, 200, map[string]any{
 		"range": rng, "startTime": isoUTC(start), "endTime": isoUTC(end),
 		"data": map[string]any{
 			"cpu":         series("cpu_metrics", "cpu_usage_percent"),
 			"memory":      series("memory_metrics", "usage_percent"),
 			"temperature": series("cpu_metrics", "cpu_temp_celsius"),
-			"network":     series("network_metrics", "bytes_recv"),
+			"network":     seriesW("network_metrics", "bytes_recv", netWhere),
+			"fan":         series("fan_metrics", "rpm"),
 		},
 	})
 }
@@ -612,6 +687,14 @@ func main() {
 		log.Printf("⚠️  DB not reachable: %v", err)
 	} else {
 		log.Println("📊 MariaDB connected")
+		// Fan-Historie (2026-08-07): einzige Tabelle, die nicht aus dem
+		// geklonten Node-Schema stammt — hier selbst anlegen. Gleiche
+		// Retention wie alle Metriken (prune-Script fuehrt sie mit).
+		db.Exec(`CREATE TABLE IF NOT EXISTS fan_metrics (
+			id INT AUTO_INCREMENT PRIMARY KEY,
+			timestamp DATETIME NOT NULL,
+			rpm INT, pwm INT, level INT,
+			INDEX idx_fan_ts (timestamp))`)
 	}
 
 	interval := 5 * time.Second
