@@ -1,0 +1,7 @@
+# raspi-monitor laeuft als User pi und schaltet die Onboard-LEDs (ACT/PWR)
+# ueber /sys/class/leds — die sysfs-Knoten sind root-only (der "LED-Steuerung
+# fehlgeschlagen: 500"-Bug, 2026-08-12). Diese Regel macht brightness+trigger
+# der beiden LEDs gruppen-schreibbar fuer pi. Anwenden ohne Reboot:
+#   sudo udevadm control --reload
+#   sudo udevadm trigger --subsystem-match=leds --action=add
+SUBSYSTEM=="leds", KERNEL=="ACT|PWR", ACTION=="add", RUN+="/bin/sh -c 'chgrp pi /sys/class/leds/%k/brightness /sys/class/leds/%k/trigger; chmod 664 /sys/class/leds/%k/brightness /sys/class/leds/%k/trigger'"

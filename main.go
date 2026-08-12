@@ -601,20 +601,45 @@ func hProcesses(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, 200, map[string]any{"processes": procs})
 }
 
+// Default-Trigger der Onboard-LEDs (Pi 5): "an" = Normalverhalten
+// wiederherstellen, nicht Dauerlicht erzwingen.
+var ledDefaultTrigger = map[string]string{
+	"ACT": "mmc0",       // Disk-Aktivitaet (gruen)
+	"PWR": "default-on", // Dauer-Power-Licht (rot)
+}
+
 func hLEDControl(w http.ResponseWriter, r *http.Request) {
 	var body struct{ Led, Action string }
 	json.NewDecoder(r.Body).Decode(&body)
 	if body.Led == "" {
 		body.Led = "ACT"
 	}
-	brightness := "0"
-	if body.Action == "on" {
-		brightness = "1"
-	}
-	path := "/sys/class/leds/" + body.Led + "/brightness"
-	if err := os.WriteFile(path, []byte(brightness), 0o644); err != nil {
-		writeJSON(w, 500, map[string]any{"success": false, "error": err.Error()})
+	// Whitelist ist Pflicht: der Name landet ungefiltert im sysfs-Pfad
+	// (Pfad-Traversal), und gemeint sind ohnehin nur die Onboard-LEDs.
+	trigger, ok := ledDefaultTrigger[body.Led]
+	if !ok {
+		writeJSON(w, 400, map[string]any{"success": false, "error": "unknown led (ACT|PWR)"})
 		return
+	}
+	base := "/sys/class/leds/" + body.Led
+	// Der TRIGGER ist der eigentliche Schalter: mit aktivem Trigger (ACT =
+	// mmc0-Aktivitaet) ueberschreibt der Kernel jede brightness sofort
+	// wieder — nur brightness zu schreiben war wirkungslos. off = Trigger
+	// aus + dunkel; on = Default-Trigger zurueck (Normalverhalten).
+	if body.Action == "on" {
+		if err := os.WriteFile(base+"/trigger", []byte(trigger), 0o644); err != nil {
+			writeJSON(w, 500, map[string]any{"success": false, "error": err.Error()})
+			return
+		}
+	} else {
+		if err := os.WriteFile(base+"/trigger", []byte("none"), 0o644); err != nil {
+			writeJSON(w, 500, map[string]any{"success": false, "error": err.Error()})
+			return
+		}
+		if err := os.WriteFile(base+"/brightness", []byte("0"), 0o644); err != nil {
+			writeJSON(w, 500, map[string]any{"success": false, "error": err.Error()})
+			return
+		}
 	}
 	writeJSON(w, 200, map[string]any{"success": true, "led": body.Led, "action": body.Action})
 }
