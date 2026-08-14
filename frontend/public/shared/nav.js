@@ -43,18 +43,21 @@
 
   // `full` nur dort, wo das Badge-Wort eine Abkuerzung ist: in der Leiste zaehlt
   // Kuerze, in der Fusszeile der richtige Name.
+  // Reihenfolge = Dashboard-Kartenlayout (2026-08-13): Hue|Lichtwerk ->
+  // Yamaha|PowerHiFi -> dB-Verlauf -> Disco -> Klima -> Garten -> Monitor|Fog
   var APPS = [
     { href: '/',             icon: 'home',      label: 'Home',      full: 'Smart Home Dashboard' },
     { href: '/app/hue/',     icon: 'hue',       label: 'Hue' },
     { href: '/app/licht/',   icon: 'lichtwerk', label: 'Lichtwerk', full: 'Lichtwerk' },
-    { href: '/app/disco/',   icon: 'disco',     label: 'Disco' },
-    { href: '/app/disco/stats', icon: 'db',     label: 'dB',        full: 'dB-Analyse' },
     { href: '/app/yamaha/',  icon: 'yamaha',    label: 'Yamaha' },
     { href: '/app/hifi/',    icon: 'hifi',      label: 'PowerHiFi', full: 'Teufel Power HiFi' },
-    { href: '/app/fog/',     icon: 'fog',       label: 'Fog' },
+    { href: '/app/disco/stats', icon: 'db',     label: 'dB',        full: 'dB-Analyse' },
+    { href: '/app/disco/',   icon: 'disco',     label: 'Disco' },
     { href: '/app/klima/',   icon: 'klima',     label: 'Klima',     full: 'Raumklima' },
     { href: '/app/garten/',  icon: 'garten',    label: 'Garten',    full: 'Gartenklima' },
-    { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor',   full: 'Raspi Monitor' }
+    { href: '/app/wetter/',  icon: 'wetter',    label: 'Wetter',    full: 'Wetter (OpenWeather)' },
+    { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor',   full: 'Raspi Monitor' },
+    { href: '/app/fog/',     icon: 'fog',       label: 'Fog' }
   ];
 
   var css = ''
