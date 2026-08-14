@@ -71,7 +71,7 @@
     + 'font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;'
     + 'font-size:13px;line-height:1;text-align:left}'
     + '#sh-appnav::-webkit-scrollbar{display:none}'
-    + '#sh-appnav .wrap{display:flex;gap:6px;align-items:center;flex:0 0 auto;margin:0 auto}'
+    + '#sh-appnav .sh-wrap{display:flex;gap:6px;align-items:center;flex:0 0 auto;margin:0 auto;max-width:none}'
     + '#sh-appnav a{display:flex;align-items:center;gap:6px;flex:0 0 auto;box-sizing:border-box;'
     + 'margin:0;border:0;outline:0;background:transparent;box-shadow:none;'
     + 'padding:7px 12px;border-radius:999px;text-decoration:none;white-space:nowrap;'
@@ -158,7 +158,7 @@
   nav.id = 'sh-appnav';
   nav.setAttribute('aria-label', 'Smart-Home-Apps');
   var wrap = document.createElement('div');
-  wrap.className = 'wrap';
+  wrap.className = 'sh-wrap';
   nav.appendChild(wrap);
 
   var onDirectMon = location.port === '4999';
