@@ -186,22 +186,6 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
         </TemperatureChart>
       </ChartContainer>
 
-      {/* GPU Temperature */}
-      <ChartContainer>
-        <ChartTitle><Icon name="gpu" /> GPU Temperature</ChartTitle>
-        <TemperatureChart temperature={gpu.gpu_temp_celsius || 0}>
-          <TemperatureValue>
-            {gpu.gpu_temp_celsius ? `${gpu.gpu_temp_celsius}°` : '--'}
-          </TemperatureValue>
-          <TemperatureInfo>
-            <TemperatureLabel>GPU Temperature</TemperatureLabel>
-            <TemperatureSubtext>
-              Measured using vcgencmd measure_temp
-            </TemperatureSubtext>
-          </TemperatureInfo>
-        </TemperatureChart>
-      </ChartContainer>
-
       {/* System Metrics */}
       <ChartContainer>
         <ChartTitle><Icon name="bars" /> System Metrics</ChartTitle>

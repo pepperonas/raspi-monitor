@@ -577,7 +577,20 @@ func hHealth(w http.ResponseWriter, r *http.Request) {
 }
 
 func hProcesses(w http.ResponseWriter, r *http.Request) {
-	out, _ := exec.Command("ps", "aux", "--sort=-%cpu", "--no-headers").Output()
+	// Echte Sortierung (2026-08-14): die Spaltenkoepfe der Prozess-Seite
+	// senden sortBy/sortOrder — vorher wurde beides IGNORIERT (immer
+	// -%cpu), die klickbare Sortierung war eine Attrappe. Whitelist ist
+	// Pflicht: der Wert landet im ps-Argument.
+	sortKeys := map[string]string{"cpu": "%cpu", "memory": "%mem"}
+	key, ok := sortKeys[r.URL.Query().Get("sortBy")]
+	if !ok {
+		key = "%cpu"
+	}
+	sign := "-"
+	if r.URL.Query().Get("sortOrder") == "asc" {
+		sign = "+"
+	}
+	out, _ := exec.Command("ps", "aux", "--sort="+sign+key, "--no-headers").Output()
 	procs := []map[string]any{}
 	for i, line := range strings.Split(strings.TrimSpace(string(out)), "\n") {
 		if i >= 30 || line == "" {
@@ -734,6 +747,16 @@ func serveStatic(w http.ResponseWriter, r *http.Request) {
 	full := frontendDir + "/" + p
 	if st, err := os.Stat(full); err != nil || st.IsDir() {
 		full = frontendDir + "/index.html" // SPA fallback
+	}
+	// Nur die CRA-gehashten Assets duerfen lange cachen; alles andere
+	// (index.html, shared/nav.js, manifest, …) MUSS revalidieren — ohne
+	// Header cachte der Browser index.html heuristisch und fuhr nach einem
+	// Deploy stundenlang das ALTE Bundle (Feldbefund 2026-08-14; dieselbe
+	// Falle wie einst bei nginx /shared/).
+	if strings.HasPrefix(p, "static/") {
+		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+	} else {
+		w.Header().Set("Cache-Control", "no-cache")
 	}
 	http.ServeFile(w, r, full)
 }

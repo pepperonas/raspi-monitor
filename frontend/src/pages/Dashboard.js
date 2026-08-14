@@ -271,20 +271,9 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
           </MetricSubtext>
         </TemperatureCard>
 
-        {/* GPU Temperature */}
-        <TemperatureCard temperature={gpu.gpu_temp_celsius || 0}>
-          <MetricTitle>
-            <Icon name="gpu" /> GPU Temperature
-          </MetricTitle>
-          <MetricValue>
-            {gpu.gpu_temp_celsius ? `${gpu.gpu_temp_celsius}°` : '--'}
-            <MetricUnit>C</MetricUnit>
-          </MetricValue>
-          <MetricSubtext>
-            Current GPU temperature from vcgencmd
-          </MetricSubtext>
-        </TemperatureCard>
-
+        {/* GPU-Temperatur bewusst entfernt (2026-08-14): vcgencmd liefert
+            die SoC-Temperatur — auf dem Pi identisch mit der CPU-Temperatur
+            (EIN Die, EIN Sensor); zwei Karten mit derselben Zahl. */}
         {/* Fan Status */}
         <MetricCard>
           <MetricTitle>

@@ -88,52 +88,6 @@ const ProgressBar = styled.div`
   }
 `;
 
-const SortControls = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-`;
-
-const SortButton = styled.button`
-  background: ${props => props.active ? props.theme.colors.primary : props.theme.colors.surface};
-  color: ${props => props.active ? 'white' : props.theme.colors.text};
-  border: 1px solid ${props => props.theme.colors.border};
-  border-radius: 6px;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: ${props => props.active ? props.theme.colors.primary : props.theme.colors.border};
-  }
-`;
-
-const RefreshButton = styled.button`
-  background: ${props => props.theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 16px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
-  margin-left: auto;
-  
-  &:hover {
-    background: ${props => props.theme.colors.primaryDark || props.theme.colors.primary};
-    transform: translateY(-1px);
-  }
-  
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-  }
-`;
-
 const StatsRow = styled.div`
   display: flex;
   gap: 20px;
@@ -185,7 +139,10 @@ const Tasks = () => {
     }
   };
 
-  // Handle sorting - simple toggle between asc/desc for same column
+  // Sortierung ueber die klickbaren Spaltenkoepfe (CPU/RAM) — das Backend
+  // sortiert seit 2026-08-14 ECHT (ps --sort); die fruehere Chip-Reihe +
+  // der Refresh-Button sind entfernt (Backend ignorierte sortBy, per-
+  // Prozess-Netzwerk existiert nicht, die Seite pollt eh alle 5 s).
   const handleSort = (column) => {
     if (sortBy === column) {
       // Same column: toggle order
@@ -197,18 +154,16 @@ const Tasks = () => {
     }
   };
 
-  // Auto refresh
+  // Initial-Load + 5-s-Auto-Poll in EINEM Effect, abhaengig von der
+  // Sortierung: das fruehere setInterval mit []-Deps hielt eine STALE
+  // CLOSURE auf loadProcesses (sortBy='cpu' fuer immer) und ueberschrieb
+  // jede Header-Sortierung 5 s spaeter wieder mit der CPU-Reihenfolge.
   useEffect(() => {
     loadProcesses();
-  }, [sortBy, sortOrder]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      loadProcesses();
-    }, 5000); // Refresh every 5 seconds
-
+    const interval = setInterval(() => loadProcesses(), 5000);
     return () => clearInterval(interval);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, sortOrder]);
 
   // Format memory size (null-safe — the backend can omit fields for some processes)
   const formatMemory = (mb) => {
@@ -217,15 +172,6 @@ const Tasks = () => {
       return `${(mb / 1024).toFixed(1)}GB`;
     }
     return `${mb.toFixed(0)}MB`;
-  };
-
-  // Format network value (null-safe)
-  const formatNetwork = (value) => {
-    value = value ?? 0;
-    if (value > 1024) {
-      return `${(value / 1024).toFixed(1)}MB/s`;
-    }
-    return `${value.toFixed(1)}KB/s`;
   };
 
   // Calculate stats
@@ -257,35 +203,6 @@ const Tasks = () => {
       </StatsRow>
 
       <ProcessesSection>
-        <SortControls>
-          <span style={{ color: '#666', marginRight: '12px' }}>Sortieren nach:</span>
-          <SortButton 
-            active={sortBy === 'cpu'} 
-            onClick={() => handleSort('cpu')}
-          >
-            CPU {sortBy === 'cpu' && (sortOrder === 'desc' ? '↓' : '↑')}
-          </SortButton>
-          <SortButton 
-            active={sortBy === 'memory'} 
-            onClick={() => handleSort('memory')}
-          >
-            RAM {sortBy === 'memory' && (sortOrder === 'desc' ? '↓' : '↑')}
-          </SortButton>
-          <SortButton 
-            active={sortBy === 'network'} 
-            onClick={() => handleSort('network')}
-          >
-            Netzwerk {sortBy === 'network' && (sortOrder === 'desc' ? '↓' : '↑')}
-          </SortButton>
-          
-          <RefreshButton 
-            onClick={() => loadProcesses()} 
-            disabled={loading}
-          >
-            {loading ? 'Aktualisiere...' : 'Aktualisieren'}
-          </RefreshButton>
-        </SortControls>
-
         {lastUpdate && (
           <div style={{ 
             fontSize: '0.8rem', 
@@ -316,13 +233,6 @@ const Tasks = () => {
               >
                 RAM %
               </TableHeader>
-              <TableHeader 
-                sortable 
-                sorted={sortBy === 'network' ? sortOrder : null}
-                onClick={() => handleSort('network')}
-              >
-                Netzwerk
-              </TableHeader>
               <TableHeader>RSS</TableHeader>
               <TableHeader>Status</TableHeader>
             </tr>
@@ -350,12 +260,6 @@ const Tasks = () => {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <ProgressBar value={process.memory ?? 0} />
                     <span>{(process.memory ?? 0).toFixed(1)}%</span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <ProgressBar value={process.network ?? 0} />
-                    <span>{formatNetwork(process.network)}</span>
                   </div>
                 </TableCell>
                 <TableCell>{formatMemory(process.rss / 1024)}</TableCell>
