@@ -148,6 +148,21 @@
     /* Während des Kreis-Reveals müssen Leiste und Knopf ihre eigenen
        Übergangsnamen abgeben, sonst laufen sie am Reveal vorbei statt mit. */
     + 'html.sh-theme-anim #sh-appnav{view-transition-name:none}'
+    /* ⚠️ Kreis-Reveal braucht den UA-Cross-Fade ABGESCHALTET (2026-08-15).
+       Per UA-Default animieren old+new eine Ein-/Ausblendung UND liegen mit
+       `mix-blend-mode:plus-lighter` uebereinander — das ist fuer einen
+       Cross-Fade gedacht, dessen Opazitaeten sich zu 1 addieren. Legt man
+       wie hier eine clip-path-Animation darueber, addieren sich zwei VOLLE
+       Bilder: die Seite wurde milchig ausgewaschen und im Kreis stand die
+       falsche Farbe. Richtig ist: das ALTE Bild bleibt deckend liegen, das
+       NEUE wird per Kreis darueber aufgezogen. Bewusst auf .sh-theme-anim
+       gescoped — der Cross-Doc-Uebergang beim App-Wechsel behaelt seinen
+       Standard-Fade. */
+    + 'html.sh-theme-anim::view-transition-image-pair(root){isolation:auto}'
+    + 'html.sh-theme-anim::view-transition-old(root),'
+    + 'html.sh-theme-anim::view-transition-new(root){animation:none;mix-blend-mode:normal}'
+    + 'html.sh-theme-anim::view-transition-old(root){z-index:1}'
+    + 'html.sh-theme-anim::view-transition-new(root){z-index:2}'
     + '@media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}';
 
   var style = document.createElement('style');
