@@ -129,6 +129,19 @@
     + 'padding:24px 0;border-top:1px solid #2b2d35;'
     + 'color:#8e9099;font:400 12px/1.6 "Roboto Flex",Roboto,system-ui,-apple-system,sans-serif;'
     + 'text-align:center}'
+    /* Seitenfuss IMMER ganz unten (2026-08-15): bei kurzen Apps hing er
+       mitten im Nichts (lichtwerk 659 px, wetter 508 px, hifi 476 px ueber
+       dem Fensterboden) — lange Apps wie yamaha sahen nur deshalb richtig
+       aus, weil ihre Seite ohnehin ueber das Fenster hinausgeht. Nur
+       Seiten MIT Fuss werden zur Flex-Spalte (der Disco-Visualizer bekommt
+       keinen), ein wachsender Platzhalter davor schiebt ihn nach unten —
+       so bleibt der 56-px-Abstand auf langen Seiten unangetastet, statt
+       ihn per margin-top:auto zu verschlucken. dvh gegen den Sprung der
+       mobilen Adressleiste. */
+    + 'body.sh-footer-page{min-height:100vh;min-height:100dvh;'
+    + 'display:flex;flex-direction:column}'
+    + 'body.sh-footer-page>#sh-push{flex:1 0 auto;min-height:0}'
+    + 'body.sh-footer-page>#sh-footer{flex:0 0 auto}'
     + '#sh-footer .sep{opacity:.45;margin:0 6px}'
     + '#sh-footer a{color:inherit;text-decoration:none;border-bottom:1px solid #44464f;'
     + 'padding-bottom:1px;transition:color .18s ease,border-color .18s ease}'
@@ -361,7 +374,15 @@
     if (willFooter()) {
       var ft = buildFooter();
       if (ft) {
+        // Wachsender Platzhalter VOR dem Fuss: schiebt ihn auf kurzen
+        // Seiten an den Fensterboden (s. .sh-footer-page oben) und ist auf
+        // langen Seiten wirkungslos.
+        var push = document.createElement('div');
+        push.id = 'sh-push';
+        push.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(push);
         document.body.appendChild(ft);
+        document.body.classList.add('sh-footer-page');
         // Der body bringt aus shared/theme.css ein Unterpolster mit (56 px),
         // damit Inhalt nicht bündig am Fensterrand endet. Mit einer Fusszeile
         // IST sie das Seitenende und bringt ihren Platz selbst mit — beides
