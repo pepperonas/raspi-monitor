@@ -43,18 +43,21 @@
 
   // `full` nur dort, wo das Badge-Wort eine Abkuerzung ist: in der Leiste zaehlt
   // Kuerze, in der Fusszeile der richtige Name.
+  // Reihenfolge = Dashboard-Kartenlayout (2026-08-13): Hue|Lichtwerk ->
+  // Yamaha|PowerHiFi -> dB-Verlauf -> Disco -> Klima -> Garten -> Monitor|Fog
   var APPS = [
     { href: '/',             icon: 'home',      label: 'Home',      full: 'Smart Home Dashboard' },
     { href: '/app/hue/',     icon: 'hue',       label: 'Hue' },
     { href: '/app/licht/',   icon: 'lichtwerk', label: 'Lichtwerk', full: 'Lichtwerk' },
-    { href: '/app/disco/',   icon: 'disco',     label: 'Disco' },
-    { href: '/app/disco/stats', icon: 'db',     label: 'dB',        full: 'dB-Analyse' },
     { href: '/app/yamaha/',  icon: 'yamaha',    label: 'Yamaha' },
     { href: '/app/hifi/',    icon: 'hifi',      label: 'PowerHiFi', full: 'Teufel Power HiFi' },
-    { href: '/app/fog/',     icon: 'fog',       label: 'Fog' },
+    { href: '/app/disco/stats', icon: 'db',     label: 'dB',        full: 'dB-Analyse' },
+    { href: '/app/disco/',   icon: 'disco',     label: 'Disco' },
     { href: '/app/klima/',   icon: 'klima',     label: 'Klima',     full: 'Raumklima' },
     { href: '/app/garten/',  icon: 'garten',    label: 'Garten',    full: 'Gartenklima' },
-    { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor',   full: 'Raspi Monitor' }
+    { href: '/app/wetter/',  icon: 'wetter',    label: 'Wetter',    full: 'Wetter (OpenWeather)' },
+    { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor',   full: 'Raspi Monitor' },
+    { href: '/app/fog/',     icon: 'fog',       label: 'Fog' }
   ];
 
   var css = ''
@@ -68,7 +71,7 @@
     + 'font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;'
     + 'font-size:13px;line-height:1;text-align:left}'
     + '#sh-appnav::-webkit-scrollbar{display:none}'
-    + '#sh-appnav .wrap{display:flex;gap:6px;align-items:center;flex:0 0 auto;margin:0 auto}'
+    + '#sh-appnav .sh-wrap{display:flex;gap:6px;align-items:center;flex:0 0 auto;margin:0 auto;max-width:none}'
     + '#sh-appnav a{display:flex;align-items:center;gap:6px;flex:0 0 auto;box-sizing:border-box;'
     + 'margin:0;border:0;outline:0;background:transparent;box-shadow:none;'
     + 'padding:7px 12px;border-radius:999px;text-decoration:none;white-space:nowrap;'
@@ -126,6 +129,38 @@
     + 'padding:24px 0;border-top:1px solid #2b2d35;'
     + 'color:#8e9099;font:400 12px/1.6 "Roboto Flex",Roboto,system-ui,-apple-system,sans-serif;'
     + 'text-align:center}'
+    /* Seitenfuss IMMER ganz unten (2026-08-15): bei kurzen Apps hing er
+       mitten im Nichts (lichtwerk 659 px, wetter 508 px, hifi 476 px ueber
+       dem Fensterboden) — lange Apps wie yamaha sahen nur deshalb richtig
+       aus, weil ihre Seite ohnehin ueber das Fenster hinausgeht. Nur
+       Seiten MIT Fuss werden zur Flex-Spalte (der Disco-Visualizer bekommt
+       keinen), ein wachsender Platzhalter davor schiebt ihn nach unten —
+       so bleibt der 56-px-Abstand auf langen Seiten unangetastet, statt
+       ihn per margin-top:auto zu verschlucken. dvh gegen den Sprung der
+       mobilen Adressleiste. */
+    + 'body.sh-footer-page{min-height:100vh;min-height:100dvh;'
+    + 'display:flex;flex-direction:column}'
+    + 'body.sh-footer-page>#sh-push{flex:1 0 auto;min-height:0}'
+    + 'body.sh-footer-page>#sh-footer{flex:0 0 auto}'
+    /* ⚠️ Die Flex-Spalte oben aendert die Breite JEDES direkten Kindes: ein
+       zentrierter Container (`max-width:1200px;margin:0 auto`) fuellt im
+       Block-Fluss die Breite bis zum Deckel — als Flex-Item schlucken die
+       Auto-Margins den Freiraum und er schrumpft auf seinen INHALT. Gemessen
+       am 2026-08-15: yamaha 532 statt 1200, wetter 493, lichtwerk 787
+       (computed `margin: 0 428.766px`). Nur Apps mit von Haus aus breitem
+       Inhalt (fog, klima) fielen nicht auf. `width:100%` stellt das
+       Block-Verhalten wieder her (die Auto-Margins rechnen dann zu 0, der
+       max-width-Deckel zentriert wie zuvor); border-box, damit ein eigenes
+       Seitenpolster nicht ueberlaeuft. Fuss/Leiste regeln ihre Breite
+       selbst. */
+    + 'body.sh-footer-page>*:not(#sh-appnav):not(#sh-themebar):not(#sh-footer)'
+    + '{width:100%;box-sizing:border-box}'
+    /* Zweite Folge der Flex-Spalte: Raender KOLLABIEREN dort nicht mehr. Ein
+       Unterrand am letzten Inhaltselement ging im Block-Fluss im 56-px-Abstand
+       des Fusses auf (max), jetzt addiert er sich (hue: 16+56=72). Das letzte
+       Element vor dem Platzhalter verliert ihn deshalb — so bleibt das
+       Haus-Mass 56 px unabhaengig davon, was die App unten anhaengt. */
+    + 'body.sh-footer-page>.sh-last-block{margin-bottom:0}'
     + '#sh-footer .sep{opacity:.45;margin:0 6px}'
     + '#sh-footer a{color:inherit;text-decoration:none;border-bottom:1px solid #44464f;'
     + 'padding-bottom:1px;transition:color .18s ease,border-color .18s ease}'
@@ -145,6 +180,21 @@
     /* Während des Kreis-Reveals müssen Leiste und Knopf ihre eigenen
        Übergangsnamen abgeben, sonst laufen sie am Reveal vorbei statt mit. */
     + 'html.sh-theme-anim #sh-appnav{view-transition-name:none}'
+    /* ⚠️ Kreis-Reveal braucht den UA-Cross-Fade ABGESCHALTET (2026-08-15).
+       Per UA-Default animieren old+new eine Ein-/Ausblendung UND liegen mit
+       `mix-blend-mode:plus-lighter` uebereinander — das ist fuer einen
+       Cross-Fade gedacht, dessen Opazitaeten sich zu 1 addieren. Legt man
+       wie hier eine clip-path-Animation darueber, addieren sich zwei VOLLE
+       Bilder: die Seite wurde milchig ausgewaschen und im Kreis stand die
+       falsche Farbe. Richtig ist: das ALTE Bild bleibt deckend liegen, das
+       NEUE wird per Kreis darueber aufgezogen. Bewusst auf .sh-theme-anim
+       gescoped — der Cross-Doc-Uebergang beim App-Wechsel behaelt seinen
+       Standard-Fade. */
+    + 'html.sh-theme-anim::view-transition-image-pair(root){isolation:auto}'
+    + 'html.sh-theme-anim::view-transition-old(root),'
+    + 'html.sh-theme-anim::view-transition-new(root){animation:none;mix-blend-mode:normal}'
+    + 'html.sh-theme-anim::view-transition-old(root){z-index:1}'
+    + 'html.sh-theme-anim::view-transition-new(root){z-index:2}'
     + '@media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}';
 
   var style = document.createElement('style');
@@ -155,7 +205,7 @@
   nav.id = 'sh-appnav';
   nav.setAttribute('aria-label', 'Smart-Home-Apps');
   var wrap = document.createElement('div');
-  wrap.className = 'wrap';
+  wrap.className = 'sh-wrap';
   nav.appendChild(wrap);
 
   var onDirectMon = location.port === '4999';
@@ -343,7 +393,27 @@
     if (willFooter()) {
       var ft = buildFooter();
       if (ft) {
+        // Wachsender Platzhalter VOR dem Fuss: schiebt ihn auf kurzen
+        // Seiten an den Fensterboden (s. .sh-footer-page oben) und ist auf
+        // langen Seiten wirkungslos.
+        var push = document.createElement('div');
+        push.id = 'sh-push';
+        push.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(push);
         document.body.appendChild(ft);
+        // Letztes Element IM FLUSS markieren: in der Flex-Spalte kollabieren
+        // Raender nicht mehr, ein Unterrand dort addiert sich also auf die
+        // 56 px des Fusses (hue: 16+56=72). Per CSS ist "letztes Kind, das
+        // nicht fixed ist" nicht ausdrueckbar — zwischen Inhalt und
+        // Platzhalter stehen noch die fixierte Leiste und der Theme-Streifen.
+        var flow = [].slice.call(document.body.children).filter(function (c) {
+          return !/^(SCRIPT|STYLE|LINK|NOSCRIPT|TEMPLATE)$/.test(c.tagName) &&
+                 c !== push && c !== ft && c.id !== 'sh-appnav' && c.id !== 'sh-themebar' &&
+                 getComputedStyle(c).position !== 'fixed' &&
+                 c.getBoundingClientRect().height > 0;
+        });
+        if (flow.length) flow[flow.length - 1].classList.add('sh-last-block');
+        document.body.classList.add('sh-footer-page');
         // Der body bringt aus shared/theme.css ein Unterpolster mit (56 px),
         // damit Inhalt nicht bündig am Fensterrand endet. Mit einer Fusszeile
         // IST sie das Seitenende und bringt ihren Platz selbst mit — beides

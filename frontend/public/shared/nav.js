@@ -142,6 +142,25 @@
     + 'display:flex;flex-direction:column}'
     + 'body.sh-footer-page>#sh-push{flex:1 0 auto;min-height:0}'
     + 'body.sh-footer-page>#sh-footer{flex:0 0 auto}'
+    /* ⚠️ Die Flex-Spalte oben aendert die Breite JEDES direkten Kindes: ein
+       zentrierter Container (`max-width:1200px;margin:0 auto`) fuellt im
+       Block-Fluss die Breite bis zum Deckel — als Flex-Item schlucken die
+       Auto-Margins den Freiraum und er schrumpft auf seinen INHALT. Gemessen
+       am 2026-08-15: yamaha 532 statt 1200, wetter 493, lichtwerk 787
+       (computed `margin: 0 428.766px`). Nur Apps mit von Haus aus breitem
+       Inhalt (fog, klima) fielen nicht auf. `width:100%` stellt das
+       Block-Verhalten wieder her (die Auto-Margins rechnen dann zu 0, der
+       max-width-Deckel zentriert wie zuvor); border-box, damit ein eigenes
+       Seitenpolster nicht ueberlaeuft. Fuss/Leiste regeln ihre Breite
+       selbst. */
+    + 'body.sh-footer-page>*:not(#sh-appnav):not(#sh-themebar):not(#sh-footer)'
+    + '{width:100%;box-sizing:border-box}'
+    /* Zweite Folge der Flex-Spalte: Raender KOLLABIEREN dort nicht mehr. Ein
+       Unterrand am letzten Inhaltselement ging im Block-Fluss im 56-px-Abstand
+       des Fusses auf (max), jetzt addiert er sich (hue: 16+56=72). Das letzte
+       Element vor dem Platzhalter verliert ihn deshalb — so bleibt das
+       Haus-Mass 56 px unabhaengig davon, was die App unten anhaengt. */
+    + 'body.sh-footer-page>.sh-last-block{margin-bottom:0}'
     + '#sh-footer .sep{opacity:.45;margin:0 6px}'
     + '#sh-footer a{color:inherit;text-decoration:none;border-bottom:1px solid #44464f;'
     + 'padding-bottom:1px;transition:color .18s ease,border-color .18s ease}'
@@ -382,6 +401,18 @@
         push.setAttribute('aria-hidden', 'true');
         document.body.appendChild(push);
         document.body.appendChild(ft);
+        // Letztes Element IM FLUSS markieren: in der Flex-Spalte kollabieren
+        // Raender nicht mehr, ein Unterrand dort addiert sich also auf die
+        // 56 px des Fusses (hue: 16+56=72). Per CSS ist "letztes Kind, das
+        // nicht fixed ist" nicht ausdrueckbar — zwischen Inhalt und
+        // Platzhalter stehen noch die fixierte Leiste und der Theme-Streifen.
+        var flow = [].slice.call(document.body.children).filter(function (c) {
+          return !/^(SCRIPT|STYLE|LINK|NOSCRIPT|TEMPLATE)$/.test(c.tagName) &&
+                 c !== push && c !== ft && c.id !== 'sh-appnav' && c.id !== 'sh-themebar' &&
+                 getComputedStyle(c).position !== 'fixed' &&
+                 c.getBoundingClientRect().height > 0;
+        });
+        if (flow.length) flow[flow.length - 1].classList.add('sh-last-block');
         document.body.classList.add('sh-footer-page');
         // Der body bringt aus shared/theme.css ein Unterpolster mit (56 px),
         // damit Inhalt nicht bündig am Fensterrand endet. Mit einer Fusszeile
