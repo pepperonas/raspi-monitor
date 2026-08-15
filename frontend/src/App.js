@@ -107,7 +107,13 @@ const GlobalStyle = createGlobalStyle`
 
 const AppContainer = styled.div`
   display: flex;
-  min-height: 100vh;
+  /* KEIN min-height:100vh mehr (2026-08-15): seit der geteilte Seitenfuss
+     unter der App sitzt, erzwang es 100vh App PLUS Fuss — bei kurzem
+     Inhalt klaffte darunter Leere (gemessen 352 px zwischen letzter Karte
+     und Fuss). Die Hoehe kommt jetzt vom Inhalt; dass die Seite trotzdem
+     bis zum Fensterboden reicht, erledigt nav.js (body.sh-footer-page +
+     wachsender Platzhalter). Der body traegt dieselbe Hintergrundfarbe,
+     es entsteht also keine sichtbare Kante. */
   background-color: ${props => props.theme.colors.background};
 `;
 
@@ -125,7 +131,6 @@ const MainContent = styled.main`
      157 px Ueberlauf, und die Reiterreihe konnte nicht scrollen, weil ihr
      Elternteil selbst zu breit war. */
   min-width: 0;
-  min-height: 100vh;
 `;
 
 const ContentArea = styled.div`
