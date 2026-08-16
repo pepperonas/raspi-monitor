@@ -36,7 +36,12 @@ const TemperatureChart = styled.div`
   position: relative;
   overflow: hidden;
   border-radius: 16px;
-  color: #fff;
+  /* ⚠️ Hier stand fest verdrahtetes #fff. Die Flaeche ist aber eine TONALE
+     Mischung aus Akzent und surface — im hellen Theme also blassgruen, und
+     weisse Schrift darauf ist nicht lesbar (Nutzerbefund 2026-08-16, das
+     "48.50°" war kaum zu erkennen). Die Schriftfarbe der Oberflaeche passt
+     in beiden Themes. */
+  color: ${props => props.theme.colors.text};
 
   /* Refined tonal temp-reactive containers (match the Dashboard hero cards). */
   ${props => {
@@ -52,6 +57,9 @@ const TemperatureChart = styled.div`
     content: '';
     position: absolute;
     inset: 0;
+    /* Weisser Glanz bleibt: er hellt die tonale Flaeche auf, und da die
+       Schrift jetzt der Oberflaechenfarbe folgt, verbessert das den Kontrast
+       im hellen Theme sogar. */
     background: radial-gradient(110% 140% at 92% 0%, rgba(255, 255, 255, 0.22), transparent 55%);
     pointer-events: none;
   }
@@ -192,19 +200,19 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
         <MetricsList>
           <MetricItem>
             <h4>CPU Usage</h4>
-            <div className="value">{cpu.cpu_usage_percent || '--'}<span className="unit">%</span></div>
+            <div className="value">{cpu.cpu_usage_percent ?? '--'}<span className="unit">%</span></div>
           </MetricItem>
           <MetricItem>
             <h4>CPU Cores</h4>
-            <div className="value">{cpu.cpu_count || '--'}</div>
+            <div className="value">{cpu.cpu_count ?? '--'}</div>
           </MetricItem>
           <MetricItem>
             <h4>CPU Frequency</h4>
-            <div className="value">{cpu.cpu_freq_current || '--'}<span className="unit">GHz</span></div>
+            <div className="value">{cpu.cpu_freq_current ? (cpu.cpu_freq_current / 1000).toFixed(2) : '--'}<span className="unit">GHz</span></div>
           </MetricItem>
           <MetricItem>
             <h4>Memory Usage</h4>
-            <div className="value">{memory.usage_percent || '--'}<span className="unit">%</span></div>
+            <div className="value">{memory.usage_percent ?? '--'}<span className="unit">%</span></div>
           </MetricItem>
           <MetricItem>
             <h4>Memory Used</h4>
@@ -216,7 +224,7 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
           </MetricItem>
           <MetricItem>
             <h4>Disk Usage</h4>
-            <div className="value">{disk.usage_percent || '--'}<span className="unit">%</span></div>
+            <div className="value">{disk.usage_percent ?? '--'}<span className="unit">%</span></div>
           </MetricItem>
           <MetricItem>
             <h4>Disk Available</h4>
@@ -224,11 +232,11 @@ const Metrics = ({ metrics = {}, isConnected = false }) => {
           </MetricItem>
           <MetricItem>
             <h4>Total Processes</h4>
-            <div className="value">{processes.total_processes || '--'}</div>
+            <div className="value">{processes.total_processes ?? '--'}</div>
           </MetricItem>
           <MetricItem>
             <h4>Running Processes</h4>
-            <div className="value">{processes.running_processes || '--'}</div>
+            <div className="value">{processes.running_processes ?? '--'}</div>
           </MetricItem>
           <MetricItem>
             <h4>Network Interface</h4>

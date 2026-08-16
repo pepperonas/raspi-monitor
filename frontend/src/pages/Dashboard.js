@@ -306,7 +306,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <MetricUnit>%</MetricUnit>
           </MetricValue>
           <MetricSubtext>
-            {cpu.cpu_count ? `${cpu.cpu_count} cores` : ''} • {cpu.cpu_freq_current ? `${cpu.cpu_freq_current} GHz` : ''}
+            {cpu.cpu_count ? `${cpu.cpu_count} cores` : ''} • {cpu.cpu_freq_current ? `${(cpu.cpu_freq_current / 1000).toFixed(2)} GHz` : ''}
           </MetricSubtext>
         </MetricCard>
 
@@ -378,7 +378,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="processes" /> Processes
           </MetricTitle>
           <MetricValue>
-            {processes.total_processes || '--'}
+            {processes.total_processes ?? '--'}
           </MetricValue>
           <MetricSubtext>
             {processes.running_processes || 0} running • {processes.sleeping_processes || 0} sleeping

@@ -165,23 +165,35 @@ const Charts = ({ isConnected = false }) => {
       try {
         const data = await apiRequest(`/api/metrics/charts?range=${timeRange}`);
         const d = data.data || {};
-        const maxLength = Math.max(d.cpu?.length || 0, d.memory?.length || 0, d.temperature?.length || 0, d.network?.length || 0, d.fan?.length || 0);
 
-        const pts = [];
-        for (let i = 0; i < maxLength; i++) {
-          const ts = d.cpu?.[i]?.timestamp || d.memory?.[i]?.timestamp || d.temperature?.[i]?.timestamp || d.network?.[i]?.timestamp || d.fan?.[i]?.timestamp;
-          if (!ts) continue;
-          pts.push({
-            fullTimestamp: ts,
-            t: new Date(ts).getTime(),
-            cpu: d.cpu?.[i]?.value ?? null,
-            memory: d.memory?.[i]?.value ?? null,
-            temperature: d.temperature?.[i]?.value ?? null,
-            netRaw: d.network?.[i]?.value ?? null,   // cumulative bytes_recv
-            fan: d.fan?.[i]?.value ?? null,
-          });
+        /* ⚠️ Die Reihen werden nach ZEITSTEMPEL zusammengefuehrt, nicht nach
+           Index. Sie sind naemlich nicht gleich lang: das Netz kommt aus einer
+           eigenen Tabelle und hatte im Befund 241 Punkte gegen 240 bei CPU,
+           RAM, Temperatur und Luefter. Beim Paaren ueber den Index bekam der
+           LETZTE Punkt damit nur einen Netzwert und sonst ueberall null —
+           genau deshalb standen in den Kacheln "--%" waehrend das Netz einen
+           Wert zeigte (Nutzerbefund 2026-08-16). Schlimmer noch: sobald eine
+           Reihe in der MITTE eine Luecke hat, verschiebt sich alles danach
+           gegeneinander und Werte landen unter fremden Zeiten. */
+        const REIHEN = ['cpu', 'memory', 'temperature', 'network', 'fan'];
+        const nachZeit = new Map();
+        for (const reihe of REIHEN) {
+          for (const p of (d[reihe] || [])) {
+            if (!p || !p.timestamp) continue;
+            let eintrag = nachZeit.get(p.timestamp);
+            if (!eintrag) {
+              eintrag = {
+                fullTimestamp: p.timestamp,
+                t: new Date(p.timestamp).getTime(),
+                cpu: null, memory: null, temperature: null, netRaw: null, fan: null,
+              };
+              nachZeit.set(p.timestamp, eintrag);
+            }
+            // netRaw ist der kumulative Zaehler, daraus wird unten die Rate
+            eintrag[reihe === 'network' ? 'netRaw' : reihe] = p.value ?? null;
+          }
         }
-        pts.sort((a, b) => a.t - b.t);
+        const pts = [...nachZeit.values()].sort((a, b) => a.t - b.t);
 
         // derive network RATE (B/s) from the cumulative counter deltas
         for (let i = 0; i < pts.length; i++) {
@@ -231,13 +243,23 @@ const Charts = ({ isConnected = false }) => {
     );
   };
 
-  const last = chartData[chartData.length - 1] || {};
+  /* Je Kennzahl den JUNGSTEN vorhandenen Wert nehmen, nicht blind den letzten
+     Datenpunkt: die Sammler schreiben nicht im Gleichtakt, und der neueste
+     Zeitstempel traegt deshalb nicht zwingend jeden Wert. Sonst zeigt eine
+     Kachel "--", obwohl der Messwert eine Zeile weiter oben steht. */
+  const juengster = (feld) => {
+    for (let i = chartData.length - 1; i >= 0; i--) {
+      const v = chartData[i][feld];
+      if (v !== null && v !== undefined) return v;
+    }
+    return null;
+  };
   const cur = {
-    cpu: last.cpu != null ? last.cpu.toFixed(1) : '--',
-    memory: last.memory != null ? last.memory.toFixed(1) : '--',
-    temperature: last.temperature != null ? last.temperature.toFixed(1) : '--',
-    network: humanRate(last.network),
-    fan: last.fan != null ? Math.round(last.fan) : null,
+    cpu: juengster('cpu') != null ? juengster('cpu').toFixed(1) : '--',
+    memory: juengster('memory') != null ? juengster('memory').toFixed(1) : '--',
+    temperature: juengster('temperature') != null ? juengster('temperature').toFixed(1) : '--',
+    network: humanRate(juengster('network')),
+    fan: juengster('fan') != null ? Math.round(juengster('fan')) : null,
   };
 
   if (!isConnected) {
