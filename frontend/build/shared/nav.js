@@ -169,7 +169,7 @@
     /* Auf schmalen Breiten bricht die Zeile an den Trennern statt mitten im
        Namen — die Teile bleiben so als Einheiten lesbar. */
     + '#sh-footer .part{display:inline-block;white-space:nowrap}'
-    + '[data-theme="light"] #sh-footer{border-top-color:#d7dae2;color:#6d7079}'
+    + '[data-theme="light"] #sh-footer{border-top-color:#d7dae2;color:#63666e}'   /* war #6d7079: 4,37:1 gegen den hellen Grund, knapp unter 4,5 (gemessen 2026-08-16) */
     + '[data-theme="light"] #sh-footer a{border-bottom-color:#c9ccd6}'
     + '@media(hover:hover){[data-theme="light"] #sh-footer a:hover{color:#2f5bd0;border-bottom-color:#2f5bd0}}'
     + '@media(max-width:520px){#sh-footer{margin-top:40px;padding:20px 0}'

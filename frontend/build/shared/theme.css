@@ -97,7 +97,7 @@
   --sh-on-primary:#ffffff;
   --sh-text:      #1a1c22;
   --sh-text2:     #4a4d57;
-  --sh-muted:     #6d7079;
+  --sh-muted:     #63666e;   /* war #6d7079: der geteilte Fuss kam damit auf 4,37:1 gegen --sh-bg2, knapp unter der 4,5er-Grenze (gemessen 2026-08-16). Jetzt 5,1:1, bleibt aber klar heller als --sh-text2. */
   --sh-outline:   #c9ccd6;
   --sh-loud:      #c0271c;
   --sh-on-loud:   #ffffff;
