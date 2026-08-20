@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Icon from '../components/Icon';
 import FanIndicator from '../components/FanIndicator';
+import AnimatedNumber from '../components/AnimatedNumber';
 import styled from 'styled-components';
 import { apiRequest } from '../config/api';
 
@@ -263,7 +264,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="thermo" /> CPU Temperature
           </MetricTitle>
           <MetricValue>
-            {cpu.cpu_temp_celsius ? `${cpu.cpu_temp_celsius}°` : '--'}
+            <AnimatedNumber value={cpu.cpu_temp_celsius} suffix="°" bezug={8} />
             <MetricUnit>C</MetricUnit>
           </MetricValue>
           <MetricSubtext>
@@ -287,7 +288,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
               color={gpu.fan_status?.status === 'on' ? '#7ddfa6' : '#8e9099'}
             />
             <MetricValue color={gpu.fan_status?.status === 'on' ? '#7ddfa6' : '#8e9099'} style={{ marginBottom: 0 }}>
-              {gpu.fan_status?.description || 'Unknown'}
+              <AnimatedNumber value={gpu.fan_status?.description} fallback="Unknown" />
             </MetricValue>
           </div>
           <MetricSubtext>
@@ -302,7 +303,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="cpu" /> CPU Usage
           </MetricTitle>
           <MetricValue color={cpu.cpu_usage_percent > 80 ? '#ff8a80' : '#b3c5ff'}>
-            {cpu.cpu_usage_percent ? `${cpu.cpu_usage_percent}` : '--'}
+            <AnimatedNumber value={cpu.cpu_usage_percent} bezug={15} />
             <MetricUnit>%</MetricUnit>
           </MetricValue>
           <MetricSubtext>
@@ -316,7 +317,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="memory" /> Memory Usage
           </MetricTitle>
           <MetricValue color={memory.usage_percent > 80 ? '#ff8a80' : '#b3c5ff'}>
-            {memory.usage_percent ? `${memory.usage_percent}` : '--'}
+            <AnimatedNumber value={memory.usage_percent} bezug={15} />
             <MetricUnit>%</MetricUnit>
           </MetricValue>
           <MetricSubtext>
@@ -333,7 +334,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="save" /> Disk Usage
           </MetricTitle>
           <MetricValue color={disk.usage_percent > 80 ? '#ff8a80' : '#b3c5ff'}>
-            {disk.usage_percent ? `${disk.usage_percent}` : '--'}
+            <AnimatedNumber value={disk.usage_percent} bezug={15} />
             <MetricUnit>%</MetricUnit>
           </MetricValue>
           <MetricSubtext>
@@ -364,7 +365,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="bars" /> Network I/O
           </MetricTitle>
           <MetricValue color="#7ddfa6">
-            {netRate.v}
+            <AnimatedNumber value={netRate.v} />
             <MetricUnit>{netRate.u}</MetricUnit>
           </MetricValue>
           <MetricSubtext>
@@ -378,7 +379,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="processes" /> Processes
           </MetricTitle>
           <MetricValue>
-            {processes.total_processes ?? '--'}
+            <AnimatedNumber value={processes.total_processes} />
           </MetricValue>
           <MetricSubtext>
             {processes.running_processes || 0} running • {processes.sleeping_processes || 0} sleeping
@@ -391,7 +392,7 @@ const Dashboard = ({ metrics = {}, alerts = [], isConnected = false }) => {
             <Icon name="siren" /> Recent Alerts
           </MetricTitle>
           <MetricValue color={alerts.length > 0 ? '#ff8a80' : '#7ddfa6'}>
-            {alerts.length}
+            <AnimatedNumber value={alerts.length} />
           </MetricValue>
           <MetricSubtext>
             {alerts.length > 0 ? 
