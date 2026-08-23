@@ -343,24 +343,89 @@
     q.forEach(function (cb) { rafEcht(cb); });
   }
 
+  /* Kreis-Ripple ohne View Transition (2026-08-23, Port der celox-Website —
+     die laeuft auf demselben S24 fluessig). Deren dokumentierter Befund
+     deckt sich mit unserem: der Vollseiten-Snapshot + animiertes clip-path
+     laeuft auf mobilen GPUs (DPR ~3) ueber den Main-Thread und „springt"
+     nach Long-Tasks ans Ende. Hier stattdessen: eine Platte in der ALTEN
+     Flaechenfarbe deckt die Seite, der Theme-Wechsel passiert UNSICHTBAR
+     darunter, dann frisst ein wachsendes Masken-Loch die Platte auf. Die
+     Seite selbst wird dabei nie pro Frame neu gerastert — nur die flache
+     Platte, und das traegt jede Handy-GPU. Der Loch-Radius ist eine
+     REGISTRIERTE Custom-Property: nur die interpoliert WAAPI fluessig,
+     rohe mask-image-Keyframes springen diskret (celox-Fund). */
+  var themeLaeuft = false;
+  function themeRipple(next, x, y) {
+    themeLaeuft = true;
+    // window.-qualifiziert: der Test-Stub kennt kein globales innerWidth.
+    var W = window.innerWidth || 0, H = window.innerHeight || 0;
+    var r = Math.hypot(Math.max(x, W - x), Math.max(y, H - y));
+    // Alte Flaechenfarbe: erster nicht-transparenter Hintergrund body -> html.
+    var alt = '';
+    try { alt = getComputedStyle(document.body).backgroundColor; } catch (e) {}
+    if (!alt || alt === 'transparent' || alt === 'rgba(0, 0, 0, 0)') {
+      try { alt = getComputedStyle(document.documentElement).backgroundColor; } catch (e) {}
+    }
+    if (!alt || alt === 'transparent' || alt === 'rgba(0, 0, 0, 0)') alt = '#111318';
+    try {
+      CSS.registerProperty({ name: '--sh-theme-hole', syntax: '<length>',
+                             inherits: false, initialValue: '0px' });
+    } catch (e) { /* schon registriert */ }
+    var maske = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, ' +
+                'transparent var(--sh-theme-hole), #000 calc(var(--sh-theme-hole) + 1px))';
+    var el = document.createElement('div');
+    el.style.cssText = 'position:fixed;inset:0;z-index:2147483000;pointer-events:none;' +
+      '--sh-theme-hole:0px;background:' + alt + ';' +
+      '-webkit-mask-image:' + maske + ';mask-image:' + maske + ';';
+    // Uebergaenge still wie beim Desktop-Reveal: das Loch zeigt das FERTIGE Theme.
+    document.documentElement.classList.add('sh-theme-anim');
+    // ⚠️ Reihenfolge traegt: ERST die Platte anhaengen (deckt, Loch = 0),
+    // DANN wechseln — sonst blitzt das neue Theme einen Frame lang voll auf.
+    document.body.appendChild(el);
+    applyTheme(next);
+    var vorbei = false;
+    function fertig() {
+      if (vorbei) return;
+      vorbei = true;
+      try { el.remove(); } catch (e) {}
+      document.documentElement.classList.remove('sh-theme-anim');
+      themeLaeuft = false;
+    }
+    var anim = null;
+    try {
+      anim = el.animate({ '--sh-theme-hole': ['0px', r + 'px'] },
+                        { duration: 560, easing: 'cubic-bezier(.22,.08,0,1)', fill: 'forwards' });
+    } catch (e) {}
+    if (anim && anim.finished) anim.finished.then(fertig).catch(fertig);
+    // Kein Animations-Objekt (Test-Stub, Uralt-Browser): dann gibt es auch
+    // keinen Reveal — sofort aufraeumen, der Wechsel ist laengst vollzogen.
+    // Sonst laege die Platte 1,4 s sinnlos ueber der Seite und die
+    // Doppel-Tipp-Sperre hielte einen echten zweiten Tipp auf.
+    else fertig();
+    // Netz: eine haengende Platte waere eine tote Seite in der alten Farbe.
+    setTimeout(fertig, 1400);
+  }
+
   function toggleTheme(btn) {
+    if (themeLaeuft) return;               // Doppel-Tipp waehrend des Laufs
     var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
     var reduced = false;
     try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
-    if (!document.startViewTransition || reduced) { applyTheme(next); return; }
+    if (reduced) { applyTheme(next); return; }
 
-    /* Auf Touch-Geraeten ist der Reveal KUERZER (520 statt 1150 ms): die
-       Vollbild-Maske laeuft dort ueber eine DPR-3-Textur, und 1,15 s geben
-       jedem verlorenen Frame eine Buehne — auf dem 120-Hz-Panel doppelt
-       sichtbar. 520 ms bleiben ausdrucksstark und sind vorbei, bevor das
-       Auge Ruckler zaehlen kann. */
-    var fein = true;
-    try { fein = matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) {}
-    var dauer = fein ? 1150 : 520;
-
-    // Kreis-Reveal aus der Knopfmitte bis zur entferntesten Viewport-Ecke.
     var r = btn.getBoundingClientRect();
     var x = r.left + r.width / 2, y = r.top + r.height / 2;
+
+    /* Handy/Touch: NIE die View Transition — deren Vollseiten-Snapshot +
+       clip-path ruckelt auf DPR-3-GPUs (S24-Befund, deckungsgleich mit dem
+       celox-Fund). Das Ripple ist dort durchgehend fluessig. Ebenso der
+       Fallback fuer Browser ohne startViewTransition. */
+    var mobil = false;
+    try { mobil = matchMedia('(max-width: 768px), (pointer: coarse)').matches; } catch (e) {}
+    if (mobil || !document.startViewTransition) { themeRipple(next, x, y); return; }
+
+    var dauer = 1150;
+    themeLaeuft = true;
     var end = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
     document.documentElement.classList.add('sh-theme-anim');
     rafEinfrieren();
@@ -377,6 +442,7 @@
     function aufraeumen() {
       document.documentElement.classList.remove('sh-theme-anim');
       rafAuftauen();
+      themeLaeuft = false;
     }
     vt.finished.finally(aufraeumen);
     /* Sicherheitsnetz — VOLLSTAENDIG aufraeumen, nicht nur rAF: in einem
