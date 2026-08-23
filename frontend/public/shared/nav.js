@@ -195,6 +195,15 @@
     + 'html.sh-theme-anim::view-transition-new(root){animation:none;mix-blend-mode:normal}'
     + 'html.sh-theme-anim::view-transition-old(root){z-index:1}'
     + 'html.sh-theme-anim::view-transition-new(root){z-index:2}'
+    /* S24-Befund 2026-08-23 („Animation abgerissen"): die new(root)-Ebene ist
+       LIVE und rastert bei jeder Seitenaenderung neu. Der Theme-Wechsel selbst
+       loest den groessten Maler aus: gemessen 310 gleichzeitige transition:all-
+       Farbuebergaenge in den ersten 100 ms. Waehrend des Reveals sind
+       Uebergaenge darum AUS (die Farben stehen sofort — genau richtig: der
+       Kreis soll das FERTIGE Theme aufziehen, nicht ein noch faerbendes) und
+       Deko-Animationen pausiert. Trifft nur NACHFAHREN von html — die
+       ::view-transition-Pseudos haengen an html selbst und laufen weiter. */
+    + 'html.sh-theme-anim *,html.sh-theme-anim *::before,html.sh-theme-anim *::after{transition:none!important;animation-play-state:paused!important}'
     + '@media(prefers-reduced-motion:reduce){::view-transition-group(*),::view-transition-old(*),::view-transition-new(*){animation:none!important}}';
 
   var style = document.createElement('style');
@@ -300,30 +309,81 @@
     }
   }
 
+  /* rAF-Schleifen waehrend des Theme-Reveals einfrieren (S24-Befund
+     2026-08-23). Das CSS oben legt die Farbuebergaenge still — die zweite
+     Raster-Quelle sind die rAF-Schleifen der Apps (Chart-Gleiten, Luefter-
+     Rotor, Canvas-Szenen): jede DOM-/Canvas-Mutation zwingt die live
+     new(root)-Ebene zum Neu-Rastern. Fuer die Dauer des Reveals werden
+     Rueckrufe gepuffert und danach in Ordnung nachgeholt — der Reveal selbst
+     ist WAAPI auf einem Pseudo und braucht kein Seiten-rAF. Negative IDs
+     kollidieren nie mit echten; cancel trifft auch Gepuffertes. */
+  // typeof-Wache: die Test-Harness laedt nav.js gegen einen DOM-Stub ohne
+  // requestAnimationFrame — ein nacktes .bind() auf Modulebene wirft dort.
+  var rafEcht = typeof window.requestAnimationFrame === 'function'
+    ? window.requestAnimationFrame.bind(window) : null;
+  var cafEcht = typeof window.cancelAnimationFrame === 'function'
+    ? window.cancelAnimationFrame.bind(window) : function () {};
+  var rafPuffer = null, rafId = -1;
+  function rafEinfrieren() {
+    if (rafPuffer || !rafEcht) return;
+    rafPuffer = new Map();
+    window.requestAnimationFrame = function (cb) {
+      var id = rafId--; rafPuffer.set(id, cb); return id;
+    };
+    window.cancelAnimationFrame = function (id) {
+      if (rafPuffer && rafPuffer.delete(id)) return;
+      cafEcht(id);
+    };
+  }
+  function rafAuftauen() {
+    if (!rafPuffer) return;
+    var q = rafPuffer; rafPuffer = null;
+    window.requestAnimationFrame = rafEcht;
+    window.cancelAnimationFrame = cafEcht;
+    q.forEach(function (cb) { rafEcht(cb); });
+  }
+
   function toggleTheme(btn) {
     var next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
     var reduced = false;
     try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
     if (!document.startViewTransition || reduced) { applyTheme(next); return; }
 
+    /* Auf Touch-Geraeten ist der Reveal KUERZER (520 statt 1150 ms): die
+       Vollbild-Maske laeuft dort ueber eine DPR-3-Textur, und 1,15 s geben
+       jedem verlorenen Frame eine Buehne — auf dem 120-Hz-Panel doppelt
+       sichtbar. 520 ms bleiben ausdrucksstark und sind vorbei, bevor das
+       Auge Ruckler zaehlen kann. */
+    var fein = true;
+    try { fein = matchMedia('(hover: hover) and (pointer: fine)').matches; } catch (e) {}
+    var dauer = fein ? 1150 : 520;
+
     // Kreis-Reveal aus der Knopfmitte bis zur entferntesten Viewport-Ecke.
     var r = btn.getBoundingClientRect();
     var x = r.left + r.width / 2, y = r.top + r.height / 2;
     var end = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
     document.documentElement.classList.add('sh-theme-anim');
+    rafEinfrieren();
     var vt = document.startViewTransition(function () { applyTheme(next); });
     vt.ready.then(function () {
       document.documentElement.animate(
         { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)',
                      'circle(' + end + 'px at ' + x + 'px ' + y + 'px)'] },
         // Literales Easing: die Web Animations API nimmt KEINE CSS-Variable.
-        { duration: 1150, easing: 'cubic-bezier(.2,0,0,1)',
+        { duration: dauer, easing: 'cubic-bezier(.2,0,0,1)',
           pseudoElement: '::view-transition-new(root)' }
       );
     }).catch(function () {});
-    vt.finished.finally(function () {
+    function aufraeumen() {
       document.documentElement.classList.remove('sh-theme-anim');
-    });
+      rafAuftauen();
+    }
+    vt.finished.finally(aufraeumen);
+    /* Sicherheitsnetz — VOLLSTAENDIG aufraeumen, nicht nur rAF: in einem
+       gedrosselten/verdeckten Tab kann finished ausbleiben (live gesehen),
+       und eine haengende sh-theme-anim-Klasse liesse mit der Regel oben
+       ALLE Uebergaenge der Seite dauerhaft tot. */
+    setTimeout(aufraeumen, dauer + 1200);
   }
 
   /* Der Disco-Visualizer bekommt keine: er ist bildschirmfuellend, der body
