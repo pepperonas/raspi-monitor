@@ -32,6 +32,7 @@
   background:transparent; color:var(--sh-primary);
   border:1px solid color-mix(in srgb, var(--sh-text) 55%, transparent);
 }
+.sh-btn.warn{ background:var(--sh-warn); color:var(--sh-on-warn) }
 .sh-btn.sm{ padding:.4rem .8rem;  font-size:.78rem }
 .sh-btn.lg{ padding:.85rem 1.5rem; font-size:1.05rem }
 
