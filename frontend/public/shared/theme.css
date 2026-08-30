@@ -219,7 +219,8 @@ a{ color:var(--sh-primary) }
 
 .sh-btn{
   border:0; border-radius:var(--sh-pill); padding:.65rem 1.15rem;
-  font-weight:800; font-family:inherit; cursor:pointer;
+  font-weight:800; font-size:.82rem; letter-spacing:.02em;
+  font-family:inherit; cursor:pointer;
   background:var(--sh-primary); color:var(--sh-on-primary);
   transition:all var(--sh-dur) var(--sh-ease);
 }
