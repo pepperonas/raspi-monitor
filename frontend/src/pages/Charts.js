@@ -141,13 +141,18 @@ const Charts = ({ isConnected = false }) => {
   });
   const setTimeRange = (r) => {
     try { localStorage.setItem(RANGE_KEY, r); } catch (_) {}
+    // Bereichswechsel zeichnet NEU EIN (Chart-Motion-Regel 2, 2026-08-30 —
+    // ersetzt den 08-07-Entscheid "nur am Anfang, woertlich"). Der 5-s-Poll
+    // bleibt weiterhin ohne Reanimation.
+    drawInDone.current = false;
+    setDrawIn(true);
     setTimeRangeState(r);
   };
   const [chartData, setChartData] = useState([]);
-  // Charts animieren NUR beim Erstaufbau (2026-08-07): recharts animiert
-  // sonst bei jedem 5-s-Poll neu — staendiges Nachzeichnen liest sich als
-  // Flackern, nicht als Live-Daten. Nach dem ersten Datensatz ist Schluss;
-  // auch ein Bereichswechsel zeichnet ohne Einflug (nur am Anfang, woertlich).
+  // Charts animieren beim Erstaufbau UND beim Bereichswechsel (Chart-Motion-
+  // Regeln 1+2). Im 5-s-Poll dagegen NIE: recharts wuerde sonst jede Runde
+  // nachzeichnen — staendiges Nachzeichnen liest sich als Flackern, nicht als
+  // Live-Daten (Befund 2026-08-07).
   const [drawIn, setDrawIn] = useState(true);
   const drawInDone = React.useRef(false);
 
