@@ -29,39 +29,19 @@ const Row = styled.nav`
   &::-webkit-scrollbar { display: none; }
 `;
 
+/* Skin = Suite-Dialekt (.sh-pill aus der vendorten shared-Kopie; NavLink v6
+   haengt 'active' selbst an -> .sh-pill.active fuellt Primary). Hier bleibt
+   nur, was der Dialekt nicht mitbringt: Chip-Dichte im Kopf (wie fog),
+   Link-Layout und die 44-px-Trefferflaeche. */
 const Chip = styled(NavLink)`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   flex: 0 0 auto;
   padding: 0.32rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid ${props => props.theme.colors.border};
-  background: transparent;
-  color: ${props => props.theme.colors.text};
-  font-size: 0.78rem;
-  font-weight: 650;
   text-decoration: none;
   white-space: nowrap;
-  transition: background 0.22s cubic-bezier(0.2, 0, 0, 1),
-              color 0.22s cubic-bezier(0.2, 0, 0, 1);
 
-  /* Aktiv = gefüllte Fläche, nicht nur getönt: die Referenz zeichnet den
-     gewählten Zustand als Fläche aus. */
-  &.active {
-    background: ${props => props.theme.colors.primary};
-    color: ${props => props.theme.colors.onAccent};
-    border-color: transparent;
-  }
-
-  @media (hover: hover) {
-    &:not(.active):hover {
-      background: color-mix(in srgb, ${props => props.theme.colors.text} 8%, transparent);
-    }
-  }
-
-  /* 44 px Trefferfläche ohne die Pille aufzublasen — wie bei den kleinen
-     Chips im Dashboard. */
   position: relative;
   &::after {
     content: '';
@@ -70,8 +50,6 @@ const Chip = styled(NavLink)`
     height: 44px;
     transform: translateY(-50%);
   }
-
-  @media (prefers-reduced-motion: reduce) { transition: none; }
 `;
 
 export const PAGES = [
@@ -87,7 +65,7 @@ export const PAGES = [
 const PageTabs = () => (
   <Row aria-label="Ansicht">
     {PAGES.map(p => (
-      <Chip key={p.path} to={p.path}>{p.text}</Chip>
+      <Chip key={p.path} to={p.path} className="sh-pill">{p.text}</Chip>
     ))}
   </Row>
 );
