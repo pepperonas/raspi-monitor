@@ -37,6 +37,10 @@
   --sh-bg2:       #0d0e12;   /* Seite — der dunkelste Ton, flach */
   --sh-surface:   #1c1d23;   /* Karten, Kacheln */
   --sh-surface2:  #26272d;   /* Eingaben, gehobene Flächen */
+  /* ---- Surface-Stufen (M3-Container-Rollen) ------------------------------ */
+  --sh-surface-container:         var(--sh-surface);
+  --sh-surface-container-high:    var(--sh-surface2);
+  --sh-surface-container-highest: #303138;   /* Menues, gehobene Flaechen */
   --sh-primary:   #b3c5ff;
   --sh-on-primary:#0a285a;   /* dunkler Text AUF dem hellen Primary */
   --sh-text:      #e4e2e9;
@@ -53,13 +57,20 @@
   --sh-warn:      #f5a04a;
   --sh-on-warn:   #3a2000;
   --sh-accent:    #7ea2ff;   /* Diagramme */
+  /* ---- Status-Aliasse (M3-Vokabular auf den Haus-Rollen) ----------------- */
+  --sh-error:      var(--sh-loud);  --sh-on-error:   var(--sh-on-loud);
+  --sh-success:    var(--sh-ok);    --sh-on-success: var(--sh-on-ok);
+  --sh-warning:    var(--sh-warn);  --sh-on-warning: var(--sh-on-warn);
 
   /* ---- Form -------------------------------------------------------------- */
   /* EIN Radius für Karten und Kacheln. Die Apps hatten vierstufige Skalen; eine
      Stufe reicht, sobald Höhe über Kontur statt über Schatten entsteht. */
-  --sh-radius:    28px;
-  --sh-radius-sm: 16px;      /* nur Eingabefelder */
-  --sh-pill:      999px;
+  /* ---- Shape-Skala (Suite-weit; Bestand = wertgleiche Aliasse) ----------- */
+  --sh-shape-xs: 4px;  --sh-shape-sm: 8px;  --sh-shape-md: 12px;
+  --sh-shape-lg: 16px; --sh-shape-xl: 28px; --sh-shape-full: 999px;
+  --sh-radius:    var(--sh-shape-xl);
+  --sh-radius-sm: var(--sh-shape-lg);      /* nur Eingabefelder */
+  --sh-pill:      var(--sh-shape-full);
 
   /* ---- Maß und Abstand --------------------------------------------------- */
   /* Satzspiegel 1200 px, und zwar am WRAP ohne eigenes Polster — das Polster
@@ -79,6 +90,23 @@
   --sh-spring:    cubic-bezier(0.34,1.42,0.5,1);
   --sh-dur:       .22s;
 
+  /* ---- Motion-Rollen (aus dem Dashboard-M3E-Kanon gehoben, wertgleich) ----
+     spatial = Bewegung/Groesse/Shape (darf federn) · effect = Farbe/Opacity
+     (NIE Bounce). ⚠️ Nur in CSS verwenden — WAAPI-easing nimmt keine Vars. */
+  --sh-motion-spring: linear(0,0.009 1.2%,0.035 2.5%,0.158 6%,0.793 18.4%,0.984 23%,1.07 27%,1.104 31.5%,1.103 35%,1.07 41%,1.013 50%,0.991 57%,0.998 75%,1);
+  --sh-motion-spatial-fast:    cubic-bezier(0.42, 1.67, 0.21, 0.90); --sh-motion-spatial-fast-dur: 350ms;
+  --sh-motion-spatial-default: var(--sh-motion-spring);              --sh-motion-spatial-default-dur: 500ms;
+  --sh-motion-spatial-slow:    var(--sh-motion-spring);              --sh-motion-spatial-slow-dur: 650ms;
+  --sh-motion-effect-fast:     cubic-bezier(0.31, 0.94, 0.34, 1.00); --sh-motion-effect-fast-dur: 150ms;
+  --sh-motion-effect-default:  cubic-bezier(0.34, 0.80, 0.34, 1.00); --sh-motion-effect-default-dur: 200ms;
+  --sh-motion-effect-slow:     cubic-bezier(0.34, 0.88, 0.34, 1.00); --sh-motion-effect-slow-dur: 300ms;
+
+  /* ---- Interaction-Opazitaeten (M3) -------------------------------------- */
+  --sh-state-hover: .08;  --sh-state-focus: .10;
+  --sh-state-press: .10;  --sh-state-drag:  .16;
+  --sh-disabled-content:   .38;
+  --sh-disabled-container: .12;
+
   /* ---- Typografie -------------------------------------------------------- */
   --sh-font: "Roboto Flex", Roboto, system-ui, -apple-system, sans-serif;
 }
@@ -93,6 +121,7 @@
   --sh-bg2:       #eef1f7;
   --sh-surface:   #ffffff;
   --sh-surface2:  #e8ebf2;
+  --sh-surface-container-highest: #dde1ea;  /* bei der Live-Verifikation messen */
   --sh-primary:   #2f5bd0;
   --sh-on-primary:#ffffff;
   --sh-text:      #1a1c22;

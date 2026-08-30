@@ -1,0 +1,169 @@
+/* =============================================================================
+   Interaction-Layer + Komponenten-Dialekt der Suite — ERWEITERT theme.css.
+   theme.css traegt den Kern (.sh-btn/.sh-pill/.sh-select/.sh-live, globaler
+   :focus-visible-Ring); hier kommen State-Layer, Varianten und die noch
+   fehlenden Komponenten dazu. Einbindung NACH theme.css, VOR dem App-<style>.
+   Spec: docs/design-system/DESIGN.md · Nur sh-praefixte Klassen.
+   ============================================================================= */
+
+:root{ --sh-ripple-dur: .5s }
+
+/* ---- State-Layer: EIN Overlay fuer Hover/Press (nur btn/icon-btn — die
+   .sh-pill behaelt ihren theme.css-Hover, zwei Layer waeren doppelt) -------- */
+.sh-btn, .sh-icon-btn{ position:relative }
+.sh-btn::after, .sh-icon-btn::after{
+  content:""; position:absolute; inset:0; border-radius:inherit;
+  background:currentColor; opacity:0; pointer-events:none;
+  transition:opacity var(--sh-motion-effect-fast-dur) var(--sh-motion-effect-fast);
+}
+.sh-btn:active::after, .sh-icon-btn:active::after{ opacity:var(--sh-state-press) }
+
+/* ---- Disabled-Norm --------------------------------------------------------- */
+.sh-btn[disabled], .sh-icon-btn[disabled], .sh-pill[disabled]{
+  pointer-events:none; opacity:var(--sh-disabled-content);
+}
+
+/* ---- Button-Varianten (Basis .sh-btn = filled primary aus theme.css) ------- */
+.sh-btn.tonal{
+  background:color-mix(in srgb, var(--sh-primary) 22%, transparent);
+  color:var(--sh-text);
+}
+.sh-btn.outline{
+  background:transparent; color:var(--sh-primary);
+  border:1px solid color-mix(in srgb, var(--sh-text) 55%, transparent);
+}
+.sh-btn.sm{ padding:.4rem .8rem;  font-size:.78rem }
+.sh-btn.lg{ padding:.85rem 1.5rem; font-size:1.05rem }
+
+/* ---- Icon-Button ------------------------------------------------------------
+   40 px sichtbar; auf Touch holt ::before eine 48-px-Trefferflaeche — deshalb
+   KEIN overflow:hidden am Knopf selbst (das wuerde die Flaeche kappen); das
+   Ripple kapselt sich in .sh-ripple-box. */
+.sh-icon-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:40px; height:40px; padding:0; flex:0 0 auto;
+  border:1px solid var(--sh-outline); border-radius:var(--sh-shape-full);
+  background:color-mix(in srgb, var(--sh-text) 4%, transparent);
+  color:var(--sh-text2); cursor:pointer; line-height:0;
+  transition:color var(--sh-motion-effect-default-dur) var(--sh-motion-effect-default);
+}
+@media (pointer: coarse){
+  .sh-icon-btn::before{ content:""; position:absolute; inset:-4px }
+}
+
+/* ---- Switch -----------------------------------------------------------------
+   Vertrag A (bevorzugt):  <label class="sh-switch"><input type="checkbox">
+     <span class="sh-switch-track"><span class="sh-switch-thumb"></span></span>
+     <span>Label</span></label>
+   Vertrag B (Bestand):    <button class="sh-switch" role="switch"
+     aria-checked="true|false"> mit denselben track/thumb-Spans. */
+.sh-switch{
+  display:inline-flex; align-items:center; gap:.6rem; cursor:pointer;
+  border:0; background:transparent; padding:0; font:inherit; color:inherit;
+}
+.sh-switch input{ position:absolute; opacity:0; width:1px; height:1px }
+.sh-switch-track{
+  position:relative; width:46px; height:26px; flex:0 0 auto;
+  border-radius:var(--sh-shape-full);
+  background:var(--sh-surface2); border:1px solid var(--sh-outline);
+  transition:background-color var(--sh-motion-effect-default-dur) var(--sh-motion-effect-default),
+             border-color     var(--sh-motion-effect-default-dur) var(--sh-motion-effect-default);
+}
+.sh-switch-thumb{
+  position:absolute; top:2px; left:2px; width:20px; height:20px;
+  border-radius:50%; background:var(--sh-muted);
+  transition:transform var(--sh-motion-spatial-default-dur) var(--sh-motion-spatial-default),
+             background-color var(--sh-motion-effect-default-dur) var(--sh-motion-effect-default);
+}
+.sh-switch input:checked + .sh-switch-track,
+.sh-switch[aria-checked="true"] .sh-switch-track{
+  background:var(--sh-primary); border-color:transparent;
+}
+.sh-switch input:checked + .sh-switch-track .sh-switch-thumb,
+.sh-switch[aria-checked="true"] .sh-switch-thumb{
+  transform:translateX(20px); background:var(--sh-on-primary);
+}
+/* Der Ring muss an die Wanne — das Input ist unsichtbar: */
+.sh-switch input:focus-visible + .sh-switch-track{
+  outline:2px solid var(--sh-primary); outline-offset:3px;
+}
+
+/* ---- Slider (input[type=range].sh-slider) -----------------------------------
+   Fuellung optional ueber --sh-slider-fill (setzt die App dort, wo sie den
+   Wert ohnehin schreibt); ohne bleibt die Wanne neutral. */
+.sh-slider{
+  appearance:none; -webkit-appearance:none; width:100%; height:26px;
+  background:transparent; cursor:pointer; margin:0;
+  --_fill: var(--sh-slider-fill, 0%);
+}
+.sh-slider::-webkit-slider-runnable-track{
+  height:6px; border-radius:var(--sh-shape-full);
+  background:linear-gradient(to right, var(--sh-primary) var(--_fill), var(--sh-surface2) var(--_fill));
+}
+.sh-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; width:18px; height:18px; margin-top:-6px;
+  border-radius:50%; background:var(--sh-primary); border:0;
+  box-shadow:0 0 0 0 color-mix(in srgb, var(--sh-primary) 25%, transparent);
+  transition:box-shadow var(--sh-motion-effect-fast-dur) var(--sh-motion-effect-fast);
+}
+.sh-slider:active::-webkit-slider-thumb{
+  box-shadow:0 0 0 8px color-mix(in srgb, var(--sh-primary) 25%, transparent);
+}
+.sh-slider::-moz-range-track{ height:6px; border-radius:var(--sh-shape-full); background:var(--sh-surface2) }
+.sh-slider::-moz-range-progress{ height:6px; border-radius:var(--sh-shape-full); background:var(--sh-primary) }
+.sh-slider::-moz-range-thumb{ width:18px; height:18px; border-radius:50%; background:var(--sh-primary); border:0 }
+
+/* ---- Tabs-Container (Kinder sind .sh-pill; aktive Pille = .active/.on) ------ */
+.sh-tabs{ display:flex; gap:6px; flex-wrap:wrap }
+.sh-tabs > *{ flex:0 0 auto }  /* nie flex:1 — die 569-px-Oval-Falle */
+
+/* ---- Select: appearance aus, EIN Pfeil (theme.css stylt Flaeche/Kontur) -----
+   Der Pfeil ist ein neutraler Data-URI-Ton (#8e9099), lesbar in beiden Themes.
+   In :hover/:focus NUR background-color — die Kurzform loescht das Pfeilbild. */
+select.sh-select{
+  appearance:none; -webkit-appearance:none; padding-right:2.2rem; cursor:pointer;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238e9099' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right .9rem center;
+}
+
+/* ---- Hover-Regeln (gesammelt; nur echte Zeiger — Sticky-Tap-Lehre) --------- */
+@media (hover: hover) and (pointer: fine){
+  .sh-btn:hover::after, .sh-icon-btn:hover::after{ opacity:var(--sh-state-hover) }
+  select.sh-select:hover{ background-color:color-mix(in srgb, var(--sh-text) 8%, var(--sh-surface2)) }
+}
+
+/* ---- Dialog / Sheet / Scrim (nur Optik — oeffnen/schliessen bleibt App-Logik) */
+.sh-scrim{ position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000 }
+.sh-dialog{
+  background:var(--sh-surface-container-high); border:1px solid var(--sh-outline);
+  border-radius:var(--sh-shape-xl); padding:1.25rem; max-width:min(92vw, 480px);
+}
+.sh-sheet{
+  position:fixed; left:0; right:0; bottom:0; z-index:1001;
+  background:var(--sh-surface-container-high); border:1px solid var(--sh-outline);
+  border-bottom:0; border-radius:var(--sh-shape-xl) var(--sh-shape-xl) 0 0;
+  padding:1.25rem; max-height:85dvh; overflow:auto;
+}
+
+/* ---- Status-Punkt (Einzelform des .sh-live-Punkts) -------------------------- */
+.sh-status-dot{
+  display:inline-block; width:8px; height:8px; border-radius:50%;
+  background:var(--sh-muted); flex:0 0 auto;
+}
+.sh-status-dot.ok{   background:var(--sh-ok);   box-shadow:0 0 10px var(--sh-ok) }
+.sh-status-dot.warn{ background:var(--sh-warn); box-shadow:0 0 10px var(--sh-warn) }
+.sh-status-dot.loud{ background:var(--sh-loud); box-shadow:0 0 10px var(--sh-loud) }
+@keyframes sh-pulse{ 0%,100%{opacity:1} 50%{opacity:.55} }
+.sh-status-dot.pulse{ animation:sh-pulse 2.4s var(--sh-motion-effect-slow) infinite }
+
+/* ---- Ripple (gezuendet von ui.js; Kapsel schneidet, nicht der Knopf) -------- */
+.sh-ripple-box{
+  position:absolute; inset:0; border-radius:inherit;
+  overflow:hidden; pointer-events:none;
+}
+.sh-ripple{
+  position:absolute; border-radius:50%; background:currentColor;
+  opacity:var(--sh-state-press); transform:scale(0);
+  animation:sh-ripple var(--sh-ripple-dur) var(--sh-motion-effect-slow) forwards;
+}
+@keyframes sh-ripple{ to{ transform:scale(1); opacity:0 } }

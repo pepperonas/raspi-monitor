@@ -83,6 +83,12 @@
     + '@media(hover:hover){#sh-appnav a:hover{background:rgba(255,255,255,.08);color:#e8eaf2;text-decoration:none}}'
     + '#sh-appnav a:active{transform:scale(.94)}'
     + '#sh-appnav a.on{background:rgba(179,197,255,.16);color:#b3c5ff}'
+    /* Pillen-Morph: die aktive Badge ist ein benanntes View-Transition-Element
+       — beim App-Wechsel morpht sie ueber die bestehende Cross-Doc-Transition
+       von der alten zur neuen Position. Kurz gehalten (.35s): Navigation muss
+       sich schnell anfuehlen. Pro Seite existiert genau EINE a.on (bestIdx). */
+    + '#sh-appnav a.on{view-transition-name:sh-active-badge}'
+    + '::view-transition-group(sh-active-badge){animation-duration:.35s}'
     + '@media(prefers-reduced-motion:reduce){#sh-appnav a{transition:none}}'
     + '[data-theme="light"] #sh-appnav{background:rgba(246,247,252,.88);border-bottom-color:rgba(0,0,0,.08)}'
     + '[data-theme="light"] #sh-appnav a{color:#5a5f6e}'
@@ -180,6 +186,7 @@
     /* Während des Kreis-Reveals müssen Leiste und Knopf ihre eigenen
        Übergangsnamen abgeben, sonst laufen sie am Reveal vorbei statt mit. */
     + 'html.sh-theme-anim #sh-appnav{view-transition-name:none}'
+    + 'html.sh-theme-anim #sh-appnav a.on{view-transition-name:none}'
     /* ⚠️ Kreis-Reveal braucht den UA-Cross-Fade ABGESCHALTET (2026-08-15).
        Per UA-Default animieren old+new eine Ein-/Ausblendung UND liegen mit
        `mix-blend-mode:plus-lighter` uebereinander — das ist fuer einen
