@@ -57,7 +57,8 @@
     { href: '/app/garten/',  icon: 'garten',    label: 'Garten',    full: 'Gartenklima' },
     { href: '/app/wetter/',  icon: 'wetter',    label: 'Wetter',    full: 'Wetter (OpenWeather)' },
     { href: '/app/monitor/', icon: 'monitor',   label: 'Monitor',   full: 'Raspi Monitor' },
-    { href: '/app/fog/',     icon: 'fog',       label: 'Fog' }
+    { href: '/app/fog/',     icon: 'fog',       label: 'Fog' },
+    { href: '/app/mac/',     icon: 'laptop',    label: 'MacBook' }
   ];
 
   var css = ''
